@@ -1,0 +1,77 @@
+import { NextResponse } from "next/server";
+import { getClientCredentialsToken, blizzardFetch } from "@/lib/blizzard";
+
+const REGIONS = new Set(["us", "eu", "kr", "tw"]);
+const REGION_LOCALES = { us: "en_US", eu: "en_GB", kr: "ko_KR", tw: "zh_TW" };
+
+function toSlug(input) {
+  return input.trim().toLowerCase().replace(/'/g, "").replace(/\s+/g, "-");
+}
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const region = (searchParams.get("region") || "us").toLowerCase();
+  const realm = searchParams.get("realm");
+  const name = searchParams.get("name");
+
+  if (!realm || !name) {
+    return NextResponse.json({ error: "realm and name are required" }, { status: 400 });
+  }
+  if (!REGIONS.has(region)) {
+    return NextResponse.json({ error: "unsupported region" }, { status: 400 });
+  }
+
+  const realmSlug = toSlug(realm);
+  const characterSlug = toSlug(name);
+  const locale = REGION_LOCALES[region];
+
+  try {
+    const token = await getClientCredentialsToken();
+    const res = await blizzardFetch(
+      `/profile/wow/character/${realmSlug}/${characterSlug}/collections/mounts?namespace=profile-${region}&locale=${locale}`,
+      token,
+      { region }
+    );
+
+    if (res.status === 404) {
+      return NextResponse.json(
+        { error: "Character not found (check the name, realm, and region)" },
+        { status: 404 }
+      );
+    }
+    if (res.status === 429) {
+      return NextResponse.json(
+        { error: "Blizzard API rate limit hit, try again shortly" },
+        { status: 429 }
+      );
+    }
+    if (!res.ok) {
+      return NextResponse.json({ error: `Blizzard API error (${res.status})` }, { status: 502 });
+    }
+
+    const data = await res.json();
+    const ownedIds = (data.mounts || []).map((m) => m.mount.id);
+
+    // Used to hide the opposing faction's mounts in the grid. Best-effort -
+    // if this call fails for any reason, fall back to showing everything
+    // rather than failing the whole lookup over a non-essential field.
+    let faction = null;
+    try {
+      const profileRes = await blizzardFetch(
+        `/profile/wow/character/${realmSlug}/${characterSlug}?namespace=profile-${region}&locale=${locale}`,
+        token,
+        { region }
+      );
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        faction = profile.faction?.type?.toLowerCase() || null;
+      }
+    } catch {
+      // ignore, faction stays null
+    }
+
+    return NextResponse.json({ ownedIds, faction });
+  } catch {
+    return NextResponse.json({ error: "Lookup failed, try again" }, { status: 500 });
+  }
+}
