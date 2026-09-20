@@ -11,6 +11,7 @@ import DailiesView from "@/components/DailiesView";
 export default function Home() {
   const [view, setView] = useState("collection"); // "collection" | "dailies"
   const [ownedIds, setOwnedIds] = useState(null);
+  const [usableIds, setUsableIds] = useState(null);
   const [faction, setFaction] = useState(null);
   const [character, setCharacter] = useState(null); // { region, realm, name } of the shown scan
   const [filter, setFilter] = useState("all");
@@ -18,6 +19,7 @@ export default function Home() {
 
   const handleScanResult = useCallback((result) => {
     setOwnedIds(result ? new Set(result.ownedIds) : null);
+    setUsableIds(result?.usableIds ?? null);
     setFaction(result?.faction ?? null);
     setCharacter(result?.character ?? null);
   }, []);
@@ -47,16 +49,20 @@ export default function Home() {
   // Tank) - counting those in the denominator makes 100% permanently
   // unreachable for anyone who missed them. Any retired mounts the player
   // already has are still surfaced, just as a separate "+n" instead.
-  const { total, collected, unobtainableOwned, retiredCount } = useMemo(() => {
+  const { total, collected, usable, unobtainableOwned, retiredCount } = useMemo(() => {
     const available = relevantMounts.filter((m) => m.sourceCategory !== "Retired");
     const unobtainable = relevantMounts.filter((m) => m.sourceCategory === "Retired");
     return {
       total: available.length,
       retiredCount: unobtainable.length,
       collected: ownedIds ? available.filter((m) => ownedIds.has(m.id)).length : null,
+      // Counted over the same mounts as `collected`, so usable <= collected.
+      // null when the scan predates usable data (see SearchBar's cache read).
+      usable:
+        ownedIds && usableIds ? available.filter((m) => usableIds.has(m.id)).length : null,
       unobtainableOwned: ownedIds ? unobtainable.filter((m) => ownedIds.has(m.id)).length : 0,
     };
-  }, [relevantMounts, ownedIds]);
+  }, [relevantMounts, ownedIds, usableIds]);
 
   return (
     <main>
@@ -82,8 +88,10 @@ export default function Home() {
         <CollectionSummary
           total={total}
           collected={collected}
+          usable={usable}
           unobtainableOwned={unobtainableOwned}
           retiredCount={retiredCount}
+          character={character}
         />
       ) : null}
       <SearchBar onScanResult={handleScanResult} />

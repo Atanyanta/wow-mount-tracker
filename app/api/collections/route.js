@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { getClientCredentialsToken, blizzardFetch } from "@/lib/blizzard";
+import { toSlug } from "@/lib/slug";
 
 const REGIONS = new Set(["us", "eu", "kr", "tw"]);
 const REGION_LOCALES = { us: "en_US", eu: "en_GB", kr: "ko_KR", tw: "zh_TW" };
-
-function toSlug(input) {
-  return input.trim().toLowerCase().replace(/'/g, "").replace(/\s+/g, "-");
-}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -51,6 +48,10 @@ export async function GET(request) {
 
     const data = await res.json();
     const ownedIds = (data.mounts || []).map((m) => m.mount.id);
+    // Each entry also carries `is_useable` (whether *this character* can use
+    // the mount - class/faction/riding restrictions) in the same response, so
+    // the usable count costs no extra Blizzard call.
+    const usableIds = (data.mounts || []).filter((m) => m.is_useable).map((m) => m.mount.id);
 
     // Used to hide the opposing faction's mounts in the grid. Best-effort -
     // if this call fails for any reason, fall back to showing everything
@@ -70,7 +71,7 @@ export async function GET(request) {
       // ignore, faction stays null
     }
 
-    return NextResponse.json({ ownedIds, faction });
+    return NextResponse.json({ ownedIds, usableIds, faction });
   } catch {
     return NextResponse.json({ error: "Lookup failed, try again" }, { status: 500 });
   }

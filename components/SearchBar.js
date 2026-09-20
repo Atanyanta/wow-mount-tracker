@@ -19,11 +19,11 @@ function readCache(query) {
   }
 }
 
-function writeCache(query, ownedIds, faction) {
+function writeCache(query, ownedIds, usableIds, faction) {
   try {
     localStorage.setItem(
       cacheKey(query),
-      JSON.stringify({ ownedIds, faction, fetchedAt: Date.now() })
+      JSON.stringify({ ownedIds, usableIds, faction, fetchedAt: Date.now() })
     );
     localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify(query));
   } catch {
@@ -56,6 +56,10 @@ export default function SearchBar({ onScanResult }) {
       if (cached) {
         onScanResult({
           ownedIds: new Set(cached.ownedIds),
+          // Scans cached before usable counts existed have no usableIds -
+          // leave it null (the summary prompts a rescan) rather than
+          // spending a Blizzard call automatically.
+          usableIds: cached.usableIds ? new Set(cached.usableIds) : null,
           faction: cached.faction ?? null,
           character: { region: last.region || "us", realm: last.realm || "", name: last.name || "" },
         });
@@ -97,8 +101,13 @@ export default function SearchBar({ onScanResult }) {
         setStatus({ type: "error", text: data.error || "Lookup failed" });
         return;
       }
-      writeCache(query, data.ownedIds, data.faction);
-      onScanResult({ ownedIds: new Set(data.ownedIds), faction: data.faction ?? null, character: query });
+      writeCache(query, data.ownedIds, data.usableIds, data.faction);
+      onScanResult({
+        ownedIds: new Set(data.ownedIds),
+        usableIds: data.usableIds ? new Set(data.usableIds) : null,
+        faction: data.faction ?? null,
+        character: query,
+      });
       const now = Date.now();
       setLastFetchedAt(now);
       setStatus({
