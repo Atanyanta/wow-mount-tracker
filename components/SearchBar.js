@@ -56,7 +56,10 @@ export default function SearchBar({ onScanResult }) {
       if (cached) {
         onScanResult({ ownedIds: new Set(cached.ownedIds), faction: cached.faction ?? null });
         setLastFetchedAt(cached.fetchedAt);
-        setStatus({ type: "info", text: `Showing cached collection from ${new Date(cached.fetchedAt).toLocaleString()}` });
+        setStatus({
+          type: "info",
+          text: `Showing cached collection for ${last.name} (${last.realm}) from ${new Date(cached.fetchedAt).toLocaleString()}`,
+        });
       }
     } catch {
       // ignore malformed localStorage state
@@ -78,6 +81,15 @@ export default function SearchBar({ onScanResult }) {
       const res = await fetch(`/api/collections?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) {
+        // A 404 means the searched character doesn't exist, so whatever is
+        // still on screen belongs to a *different* character than the one in
+        // the search box - clear it rather than leave misleading results.
+        // Transient failures (rate limit, 5xx) keep the previous results,
+        // which the status line labels by character.
+        if (res.status === 404) {
+          onScanResult(null);
+          setLastFetchedAt(null);
+        }
         setStatus({ type: "error", text: data.error || "Lookup failed" });
         return;
       }
@@ -85,7 +97,10 @@ export default function SearchBar({ onScanResult }) {
       onScanResult({ ownedIds: new Set(data.ownedIds), faction: data.faction ?? null });
       const now = Date.now();
       setLastFetchedAt(now);
-      setStatus({ type: "info", text: `Loaded ${data.ownedIds.length} owned mounts just now.` });
+      setStatus({
+        type: "info",
+        text: `Loaded ${data.ownedIds.length} owned mounts for ${name.trim()} (${realm.trim()}) just now.`,
+      });
     } catch {
       setStatus({ type: "error", text: "Network error, try again." });
     } finally {

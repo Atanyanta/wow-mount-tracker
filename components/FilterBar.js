@@ -6,7 +6,7 @@ const OPTIONS = [
   { value: "uncollected", label: "Uncollected" },
 ];
 
-export default function FilterBar({ filter, onFilterChange, disabled }) {
+export default function FilterBar({ filter, onFilterChange, disabled, showRetired, onShowRetiredChange }) {
   return (
     <div className="filter-bar">
       {OPTIONS.map(({ value, label }) => (
@@ -22,6 +22,14 @@ export default function FilterBar({ filter, onFilterChange, disabled }) {
           {label}
         </label>
       ))}
+      <label>
+        <input
+          type="checkbox"
+          checked={showRetired}
+          onChange={(e) => onShowRetiredChange(e.target.checked)}
+        />
+        Show retired
+      </label>
       {disabled ? (
         <span className="filter-bar-hint">Scan a character to filter by collected/uncollected.</span>
       ) : null}
