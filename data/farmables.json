@@ -1,0 +1,291 @@
+{
+  "_readme": "Hand-audited list of mounts farmable from repeatable kills on a daily/weekly lockout. Keyed by Blizzard mount id (same ids as data/mounts.json). Edit this file to fix or extend; run `npm run check:farmables` to validate ids/names and regenerate docs/farmables-review.md. cadence: daily|weekly (resets per region, see lib/resets.js). eventOnly groups are only farmable while the holiday/event is live. confidence: high = confirmed by Wowhead's daily/weekly guide or in-data notes; medium = rule inferred (see note); low = unverified, please check in game.",
+  "groups": [
+    {
+      "id": "weekly-raids",
+      "title": "Weekly - Raids",
+      "cadence": "weekly",
+      "type": "raid",
+      "activities": [
+        { "id": "karazhan", "name": "Karazhan", "zone": "Deadwind Pass", "expansion": "The Burning Crusade", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 168, "name": "Fiery Warhorse", "boss": "Attumen the Huntsman" } ] },
+        { "id": "the-eye", "name": "The Eye (Tempest Keep)", "zone": "Netherstorm", "expansion": "The Burning Crusade", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 183, "name": "Ashes of Al'ar", "boss": "Kael'thas Sunstrider" } ] },
+        { "id": "temple-of-ahnqiraj", "name": "Temple of Ahn'Qiraj", "zone": "Silithus", "expansion": "Classic", "difficulty": "Legacy raid", "confidence": "medium",
+          "note": "Source text is empty in mounts.json; drop list comes from Wowhead's daily/weekly guide (Qiraji Resonating Crystals from trash, roughly 1-3%).",
+          "mounts": [
+            { "id": 117, "name": "Blue Qiraji Battle Tank", "boss": "Trash mobs" },
+            { "id": 118, "name": "Red Qiraji Battle Tank", "boss": "Trash mobs" },
+            { "id": 119, "name": "Yellow Qiraji Battle Tank", "boss": "Trash mobs" },
+            { "id": 120, "name": "Green Qiraji Battle Tank", "boss": "Trash mobs" }
+          ] },
+        { "id": "eye-of-eternity", "name": "The Eye of Eternity", "zone": "Coldarra", "expansion": "Wrath of the Lich King", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [
+            { "id": 246, "name": "Azure Drake", "boss": "Malygos" },
+            { "id": 247, "name": "Blue Drake", "boss": "Malygos" }
+          ] },
+        { "id": "obsidian-sanctum", "name": "The Obsidian Sanctum", "zone": "Dragonblight", "expansion": "Wrath of the Lich King", "difficulty": "Legacy raid (drake count and 10/25 matter)", "confidence": "high",
+          "mounts": [
+            { "id": 250, "name": "Twilight Drake", "boss": "Sartharion", "difficulty": "25-player, 3 drakes up" },
+            { "id": 253, "name": "Black Drake", "boss": "Sartharion", "difficulty": "10-player" }
+          ] },
+        { "id": "vault-of-archavon", "name": "Vault of Archavon", "zone": "Wintergrasp", "expansion": "Wrath of the Lich King", "difficulty": "Legacy raid", "confidence": "high",
+          "note": "Alliance and Horde versions share a name; the app treats a mount as owned if either twin is owned.",
+          "mounts": [
+            { "id": 286, "name": "Grand Black War Mammoth", "boss": "Archavon / Emalon / Koralon / Toravon" },
+            { "id": 287, "name": "Grand Black War Mammoth", "boss": "Archavon / Emalon / Koralon / Toravon" }
+          ] },
+        { "id": "ulduar", "name": "Ulduar", "zone": "The Storm Peaks", "expansion": "Wrath of the Lich King", "difficulty": "Legacy raid, 25-player, no Keepers (0 Keepers)", "confidence": "high",
+          "mounts": [ { "id": 304, "name": "Mimiron's Head", "boss": "Yogg-Saron" } ] },
+        { "id": "onyxias-lair", "name": "Onyxia's Lair", "zone": "Dustwallow Marsh", "expansion": "Wrath of the Lich King", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 349, "name": "Onyxian Drake", "boss": "Onyxia" } ] },
+        { "id": "icecrown-citadel", "name": "Icecrown Citadel", "zone": "Icecrown", "expansion": "Wrath of the Lich King", "difficulty": "Heroic 25-player", "confidence": "high",
+          "mounts": [ { "id": 363, "name": "Invincible", "boss": "The Lich King" } ] },
+        { "id": "throne-of-the-four-winds", "name": "Throne of the Four Winds", "zone": "Uldum", "expansion": "Cataclysm", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 396, "name": "Drake of the South Wind", "boss": "Al'Akir" } ] },
+        { "id": "firelands", "name": "Firelands", "zone": "Mount Hyjal", "expansion": "Cataclysm", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [
+            { "id": 415, "name": "Pureblood Fire Hawk", "boss": "Ragnaros" },
+            { "id": 425, "name": "Flametalon of Alysrazor", "boss": "Alysrazor" }
+          ] },
+        { "id": "dragon-soul", "name": "Dragon Soul", "zone": "Caverns of Time", "expansion": "Cataclysm", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [
+            { "id": 445, "name": "Experiment 12-B", "boss": "Ultraxion" },
+            { "id": 442, "name": "Blazing Drake", "boss": "Deathwing", "difficulty": "Normal or Heroic" },
+            { "id": 444, "name": "Life-Binder's Handmaiden", "boss": "Deathwing", "difficulty": "Heroic" }
+          ] },
+        { "id": "mogushan-vaults", "name": "Mogu'shan Vaults", "zone": "Kun-Lai Summit", "expansion": "Mists of Pandaria", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 478, "name": "Astral Cloud Serpent", "boss": "Elegon" } ] },
+        { "id": "throne-of-thunder", "name": "Throne of Thunder", "zone": "Isle of Thunder", "expansion": "Mists of Pandaria", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [
+            { "id": 531, "name": "Spawn of Horridon", "boss": "Horridon" },
+            { "id": 543, "name": "Clutch of Ji-Kun", "boss": "Ji-Kun" }
+          ] },
+        { "id": "siege-of-orgrimmar", "name": "Siege of Orgrimmar", "zone": "Vale of Eternal Blossoms", "expansion": "Mists of Pandaria", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 559, "name": "Kor'kron Juggernaut", "boss": "Garrosh Hellscream" } ] },
+        { "id": "blackrock-foundry", "name": "Blackrock Foundry", "zone": "Gorgrond", "expansion": "Warlords of Draenor", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 613, "name": "Ironhoof Destroyer", "boss": "Blackhand" } ] },
+        { "id": "hellfire-citadel", "name": "Hellfire Citadel", "zone": "Tanaan Jungle", "expansion": "Warlords of Draenor", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 751, "name": "Felsteel Annihilator", "boss": "Archimonde" } ] },
+        { "id": "the-nighthold", "name": "The Nighthold", "zone": "Suramar", "expansion": "Legion", "difficulty": "Any / Mythic", "confidence": "high",
+          "mounts": [
+            { "id": 791, "name": "Felblaze Infernal", "boss": "Gul'dan", "difficulty": "Normal or higher" },
+            { "id": 633, "name": "Hellfire Infernal", "boss": "Gul'dan", "difficulty": "Mythic" }
+          ] },
+        { "id": "tomb-of-sargeras", "name": "Tomb of Sargeras", "zone": "Broken Shore", "expansion": "Legion", "difficulty": "Legacy raid", "confidence": "high",
+          "mounts": [ { "id": 899, "name": "Abyss Worm", "boss": "Mistress Sassz'ine" } ] },
+        { "id": "antorus", "name": "Antorus, the Burning Throne", "zone": "Argus", "expansion": "Legion", "difficulty": "Any / Mythic", "confidence": "high",
+          "mounts": [
+            { "id": 971, "name": "Antoran Charhound", "boss": "Felhounds of Sargeras" },
+            { "id": 954, "name": "Shackled Ur'zul", "boss": "Argus the Unmaker", "difficulty": "Mythic" }
+          ] },
+        { "id": "battle-of-dazaralor", "name": "Battle of Dazar'alor", "zone": "Zuldazar", "expansion": "Battle for Azeroth", "difficulty": "Any / Mythic", "confidence": "high",
+          "mounts": [
+            { "id": 1217, "name": "G.M.O.D.", "boss": "High Tinker Mekkatorque" },
+            { "id": 1219, "name": "Glacial Tidestorm", "boss": "Lady Jaina Proudmoore", "difficulty": "Mythic" }
+          ] },
+        { "id": "nyalotha", "name": "Ny'alotha, the Waking City", "zone": "Vale of Eternal Blossoms", "expansion": "Battle for Azeroth", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 1293, "name": "Ny'alotha Allseer", "boss": "N'Zoth, the Corruptor" } ] },
+        { "id": "sanctum-of-domination", "name": "Sanctum of Domination", "zone": "The Maw", "expansion": "Shadowlands", "difficulty": "Any / Mythic", "confidence": "high",
+          "mounts": [
+            { "id": 1500, "name": "Sanctum Gloomcharger", "boss": "The Nine" },
+            { "id": 1471, "name": "Vengeance", "boss": "Sylvanas Windrunner", "difficulty": "Mythic" }
+          ] },
+        { "id": "sepulcher", "name": "Sepulcher of the First Ones", "zone": "Zereth Mortis", "expansion": "Shadowlands", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 1587, "name": "Zereth Overseer", "boss": "The Jailer" } ] },
+        { "id": "naxxramas-remix", "name": "Naxxramas", "zone": "Dragonblight", "expansion": "Dragonflight", "difficulty": "Unspecified in source (added 10.1.5)", "confidence": "low",
+          "note": "Source says only 'Dropped by Valiance in Naxxramas' - check which Naxxramas version/lockout applies.",
+          "mounts": [ { "id": 1774, "name": "Valiance", "boss": "Valiance" } ] },
+        { "id": "amirdrassil", "name": "Amirdrassil, the Dream's Hope", "zone": "The Emerald Dream", "expansion": "Dragonflight", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 1818, "name": "Anu'relos, Flame's Guidance", "boss": "Fyrakk" } ] },
+        { "id": "nerub-ar-palace", "name": "Nerub-ar Palace", "zone": "Azj-Kahet", "expansion": "The War Within", "difficulty": "Any / Mythic", "confidence": "high",
+          "mounts": [
+            { "id": 2219, "name": "Sureki Skyrazor", "boss": "Queen Ansurek" },
+            { "id": 2223, "name": "Ascendant Skyrazor", "boss": "Queen Ansurek", "difficulty": "Mythic" }
+          ] },
+        { "id": "liberation-of-undermine", "name": "Liberation of Undermine", "zone": "Undermine", "expansion": "The War Within", "difficulty": "Any / Mythic", "confidence": "medium",
+          "note": "Flarendo the Furious is listed as a raid drop that also needs Renown Rank 20 (Gallagio Loyalty Rewards Club) - check the exact requirement.",
+          "mounts": [
+            { "id": 2507, "name": "Prototype A.S.M.R.", "boss": "Chrome King Gallywix" },
+            { "id": 2487, "name": "The Big G", "boss": "Chrome King Gallywix", "difficulty": "Mythic" },
+            { "id": 2278, "name": "Flarendo the Furious", "boss": "Ando the Gat", "confidence": "low" }
+          ] },
+        { "id": "manaforge-omega", "name": "Manaforge Omega", "zone": "K'aresh", "expansion": "The War Within", "difficulty": "Mythic", "confidence": "high",
+          "mounts": [ { "id": 2569, "name": "Unbound Star-Eater", "boss": "Dimensius" } ] },
+        { "id": "midnight-falls", "name": "March on Quel'Danas", "zone": "Isle of Quel'Danas", "expansion": "Midnight", "difficulty": "Mythic", "confidence": "medium",
+          "note": "Midnight content (post my knowledge cutoff): weekly raid rule assumed, verify.",
+          "mounts": [ { "id": 2607, "name": "Ashes of Belo'ren", "boss": "Midnight Falls encounter" } ] },
+        { "id": "sporefall", "name": "Sporefall", "zone": "Harandar", "expansion": "Midnight", "difficulty": "Raid (indirect drop)", "confidence": "low",
+          "note": "Luminous Sporeglider is crafted by combining 4 Delicious Sporesnacks dropped by Rotmire; per-boss/lockout details unverified.",
+          "mounts": [ { "id": 2950, "name": "Luminous Sporeglider", "boss": "Rotmire (Sporesnacks)" } ] },
+        { "id": "venomous-abyss", "name": "The Venomous Abyss", "zone": "Midnight", "expansion": "Midnight", "difficulty": "Mythic", "confidence": "medium",
+          "note": "Midnight content (post my knowledge cutoff): weekly raid rule assumed, verify.",
+          "mounts": [ { "id": 3030, "name": "Primeval Skyfriend", "boss": "Ula'tek" } ] }
+      ]
+    },
+    {
+      "id": "weekly-world-bosses",
+      "title": "Weekly - World bosses",
+      "cadence": "weekly",
+      "type": "world-boss",
+      "activities": [
+        { "id": "sha-of-anger", "name": "Sha of Anger", "zone": "Kun-Lai Summit", "expansion": "Mists of Pandaria", "difficulty": "World boss", "confidence": "high",
+          "mounts": [ { "id": 473, "name": "Heavenly Onyx Cloud Serpent", "boss": "Sha of Anger" } ] },
+        { "id": "galleon", "name": "Galleon", "zone": "Valley of the Four Winds", "expansion": "Mists of Pandaria", "difficulty": "World boss", "confidence": "high",
+          "mounts": [ { "id": 515, "name": "Son of Galleon", "boss": "Galleon" } ] },
+        { "id": "nalak", "name": "Nalak, the Storm Lord", "zone": "Isle of Thunder", "expansion": "Mists of Pandaria", "difficulty": "World boss", "confidence": "high",
+          "mounts": [ { "id": 542, "name": "Thundering Cobalt Cloud Serpent", "boss": "Nalak" } ] },
+        { "id": "oondasta", "name": "Oondasta", "zone": "Isle of Giants", "expansion": "Mists of Pandaria", "difficulty": "World boss", "confidence": "high",
+          "mounts": [ { "id": 533, "name": "Cobalt Primordial Direhorn", "boss": "Oondasta" } ] },
+        { "id": "rukhmar", "name": "Rukhmar", "zone": "Spires of Arak", "expansion": "Warlords of Draenor", "difficulty": "World boss", "confidence": "high",
+          "mounts": [ { "id": 634, "name": "Solar Spirehawk", "boss": "Rukhmar" } ] },
+        { "id": "lord-helnurath", "name": "Lord Hel'nurath", "zone": "Broken Shore", "expansion": "Legion", "difficulty": "World boss", "confidence": "medium",
+          "note": "Guaranteed drop, but only after you own the Warlock class mount Netherlord's Chaotic Wrathsteed.",
+          "mounts": [ { "id": 931, "name": "Netherlord's Accursed Wrathsteed", "boss": "Lord Hel'nurath" } ] },
+        { "id": "dunegorger-kraulok", "name": "Dunegorger Kraulok", "zone": "Vol'dun", "expansion": "Battle for Azeroth", "difficulty": "World boss", "confidence": "medium",
+          "note": "Rotating world boss - only up about one week in six (warcraftmounts note); the weekly lockout still applies when it is up.",
+          "mounts": [ { "id": 1250, "name": "Mollie", "boss": "Dunegorger Kraulok" } ] }
+      ]
+    },
+    {
+      "id": "weekly-other",
+      "title": "Weekly - Other kills",
+      "cadence": "weekly",
+      "type": "open-world",
+      "activities": [
+        { "id": "devourer-swarms", "name": "Devourer Swarm bosses", "zone": "K'aresh", "expansion": "The War Within", "difficulty": "Event boss, warband-wide weekly cap", "confidence": "medium",
+          "note": "Mount is assembled from 20 Devoured Energy-Pods; each of the four swarm bosses drops one pod per week for your warband (max 4 per week, so at least 5 weeks).",
+          "mounts": [ { "id": 2602, "name": "Translocated Gorger", "boss": "Devourer Swarm final bosses" } ] }
+      ]
+    },
+    {
+      "id": "daily-heroic-dungeons",
+      "title": "Daily - Heroic dungeons",
+      "cadence": "daily",
+      "type": "dungeon",
+      "activities": [
+        { "id": "sethekk-halls", "name": "Sethekk Halls", "zone": "Terokkar Forest", "expansion": "The Burning Crusade", "difficulty": "Heroic", "confidence": "high",
+          "mounts": [ { "id": 185, "name": "Raven Lord", "boss": "Anzu" } ] },
+        { "id": "magisters-terrace-bc", "name": "Magisters' Terrace (Burning Crusade)", "zone": "Isle of Quel'Danas", "expansion": "The Burning Crusade", "difficulty": "Heroic", "confidence": "high",
+          "mounts": [ { "id": 213, "name": "Swift White Hawkstrider", "boss": "Kael'thas Sunstrider" } ] },
+        { "id": "utgarde-pinnacle", "name": "Utgarde Pinnacle", "zone": "Howling Fjord", "expansion": "Wrath of the Lich King", "difficulty": "Heroic", "confidence": "high",
+          "mounts": [ { "id": 264, "name": "Blue Proto-Drake", "boss": "Skadi the Ruthless" } ] },
+        { "id": "culling-of-stratholme", "name": "The Culling of Stratholme", "zone": "Caverns of Time", "expansion": "Wrath of the Lich King", "difficulty": "Heroic, timed run", "confidence": "high",
+          "mounts": [ { "id": 248, "name": "Bronze Drake", "boss": "Infinite Corruptor" } ] },
+        { "id": "zul-gurub", "name": "Zul'Gurub", "zone": "Northern Stranglethorn", "expansion": "Cataclysm", "difficulty": "Heroic", "confidence": "high",
+          "mounts": [
+            { "id": 411, "name": "Swift Zulian Panther", "boss": "High Priestess Kilnara" },
+            { "id": 410, "name": "Armored Razzashi Raptor", "boss": "Bloodlord Mandokir" }
+          ] },
+        { "id": "zul-aman", "name": "Zul'Aman", "zone": "Ghostlands", "expansion": "Cataclysm", "difficulty": "Heroic, timed run (free Kasha within 20 minutes)", "confidence": "high",
+          "mounts": [ { "id": 419, "name": "Amani Battle Bear", "boss": "Kasha's Bag" } ] },
+        { "id": "plaguefall", "name": "Plaguefall", "zone": "Maldraxxus", "expansion": "Shadowlands", "difficulty": "Heroic or Mythic", "confidence": "medium",
+          "note": "Rare inside the dungeon (Curious Slime Serpent); assumed to fall under the dungeon lockout.",
+          "mounts": [ { "id": 1445, "name": "Slime Serpent", "boss": "Curious Slime Serpent" } ] },
+        { "id": "tazavesh", "name": "Tazavesh, the Veiled Market", "zone": "Ringing Deeps / Oribos", "expansion": "Shadowlands", "difficulty": "Heroic or Mythic", "confidence": "high",
+          "mounts": [ { "id": 1481, "name": "Cartel Master's Gearglider", "boss": "So'leah" } ] },
+        { "id": "altar-of-fangs", "name": "Altar of Fangs", "zone": "Midnight", "expansion": "Midnight", "difficulty": "Unspecified in source", "confidence": "low",
+          "note": "Midnight dungeon (post my knowledge cutoff): difficulty and lockout unverified.",
+          "mounts": [ { "id": 3058, "name": "The Writhing Brood", "boss": "Zul'jan" } ] }
+      ]
+    },
+    {
+      "id": "daily-mythic-dungeons",
+      "title": "Daily - Mythic 0 dungeons",
+      "cadence": "daily",
+      "type": "dungeon",
+      "activities": [
+        { "id": "return-to-karazhan", "name": "Return to Karazhan", "zone": "Deadwind Pass", "expansion": "Legion", "difficulty": "Mythic", "confidence": "medium",
+          "note": "Mythic 0 lockout was weekly before The War Within and daily since (MMO-Champion). Wowhead's older guide lists these as weekly.",
+          "mounts": [
+            { "id": 875, "name": "Midnight", "boss": "Attumen the Huntsman" },
+            { "id": 883, "name": "Smoldering Ember Wyrm", "boss": "Nightbane" }
+          ] },
+        { "id": "freehold", "name": "Freehold", "zone": "Tiragarde Sound", "expansion": "Battle for Azeroth", "difficulty": "Mythic", "confidence": "medium",
+          "mounts": [ { "id": 995, "name": "Sharkbait", "boss": "Harlan Sweete" } ] },
+        { "id": "kings-rest", "name": "Kings' Rest", "zone": "Zuldazar", "expansion": "Battle for Azeroth", "difficulty": "Mythic", "confidence": "medium",
+          "mounts": [ { "id": 1040, "name": "Tomb Stalker", "boss": "King Dazar" } ] },
+        { "id": "the-underrot", "name": "The Underrot", "zone": "Nazmir", "expansion": "Battle for Azeroth", "difficulty": "Mythic", "confidence": "medium",
+          "note": "missingmounts.com lists this as weekly; TWW-era rule is daily. Verify which applies.",
+          "mounts": [ { "id": 1053, "name": "Underrot Crawg", "boss": "Unbound Abomination" } ] },
+        { "id": "operation-mechagon", "name": "Operation: Mechagon", "zone": "Mechagon Island", "expansion": "Battle for Azeroth", "difficulty": "Heroic / Mythic", "confidence": "medium",
+          "mounts": [
+            { "id": 1227, "name": "Aerial Unit R-21/X", "boss": "King Mechagon", "difficulty": "Any (source: Dungeon)" },
+            { "id": 1252, "name": "Mechagon Peacekeeper", "boss": "HK-8 Aerial Oppression Unit", "difficulty": "Mythic" }
+          ] },
+        { "id": "necrotic-wake", "name": "The Necrotic Wake", "zone": "Bastion", "expansion": "Shadowlands", "difficulty": "Mythic", "confidence": "high",
+          "note": "Confirmed daily in MMO-Champion's TWW checklist.",
+          "mounts": [ { "id": 1406, "name": "Marrowfang", "boss": "Nalthor the Rimebinder" } ] },
+        { "id": "the-stonevault", "name": "The Stonevault", "zone": "Isle of Dorn", "expansion": "The War Within", "difficulty": "Mythic", "confidence": "medium",
+          "mounts": [ { "id": 2119, "name": "Stonevault Mechsuit", "boss": "High Speaker Eirich" } ] },
+        { "id": "windrunner-spire", "name": "Windrunner Spire", "zone": "Eversong Woods", "expansion": "Midnight", "difficulty": "Mythic", "confidence": "low",
+          "note": "Midnight dungeon (post my knowledge cutoff). One secondary source says Mythic 0 is daily at level 90 (weekly during pre-season).",
+          "mounts": [ { "id": 2805, "name": "Spectral Hawkstrider", "boss": "The Restless Heart" } ] },
+        { "id": "magisters-terrace-midnight", "name": "Magisters' Terrace (Midnight)", "zone": "Isle of Quel'Danas", "expansion": "Midnight", "difficulty": "Mythic", "confidence": "low",
+          "note": "Midnight dungeon (post my knowledge cutoff), same caveat as Windrunner Spire.",
+          "mounts": [ { "id": 2817, "name": "Lucent Hawkstrider", "boss": "Degentrius" } ] }
+      ]
+    },
+    {
+      "id": "daily-other",
+      "title": "Daily - Other kills",
+      "cadence": "daily",
+      "type": "open-world",
+      "activities": [
+        { "id": "tanaan-elites", "name": "Tanaan Jungle rare elites", "zone": "Tanaan Jungle", "expansion": "Warlords of Draenor", "difficulty": "Open world, personal loot", "confidence": "high",
+          "note": "warcraftmounts: 'each elite yields personal loot once per day'. Same three mounts drop from Vengeance, Deathtalon, Terrorfist and Doomroller.",
+          "mounts": [
+            { "id": 611, "name": "Tundra Icehoof", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" },
+            { "id": 622, "name": "Armored Razorback", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" },
+            { "id": 643, "name": "Warsong Direfang", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" }
+          ] },
+        { "id": "theater-of-pain", "name": "Theater of Pain rotating bosses", "zone": "Maldraxxus", "expansion": "Shadowlands", "difficulty": "Arena content, 4 bosses per day", "confidence": "medium",
+          "note": "warcraftmounts: one loot chance per boss per day; bosses rotate daily (Azmogal, Devmorta, Xantuth, Urtz, Ti'or, Mistress Dyrax).",
+          "mounts": [ { "id": 1437, "name": "Battle-Bound Warhound", "boss": "Theater of Pain bosses" } ] }
+      ]
+    },
+    {
+      "id": "event-holiday-bosses",
+      "title": "Event only - Holiday bosses (daily while the event runs)",
+      "cadence": "daily",
+      "type": "holiday-boss",
+      "eventOnly": true,
+      "activities": [
+        { "id": "brewfest", "name": "Coren Direbrew (Brewfest)", "zone": "Blackrock Depths (event dungeon)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
+          "note": "Brewfest Bomber is limited to your first attempt per account per day.",
+          "mounts": [
+            { "id": 202, "name": "Swift Brewfest Ram", "boss": "Coren Direbrew" },
+            { "id": 226, "name": "Great Brewfest Kodo", "boss": "Coren Direbrew" },
+            { "id": 2640, "name": "Brewfest Bomber", "boss": "Coren Direbrew" }
+          ] },
+        { "id": "hallows-end", "name": "The Headless Horseman (Hallow's End)", "zone": "Scarlet Monastery (event version)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
+          "mounts": [
+            { "id": 219, "name": "Headless Horseman's Mount", "boss": "The Headless Horseman" },
+            { "id": 2623, "name": "The Headless Horseman's Ghoulish Charger", "boss": "The Headless Horseman" }
+          ] },
+        { "id": "love-is-in-the-air", "name": "Crown Chemical Co. (Love is in the Air)", "zone": "Shadowfang Keep (event version)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
+          "note": "Notes say the mount may only drop from the first box per account.",
+          "mounts": [
+            { "id": 352, "name": "X-45 Heartbreaker", "boss": "Crown Chemical Co." },
+            { "id": 2328, "name": "Love Witch's Sweeper", "boss": "Crown Chemical Co." },
+            { "id": 2492, "name": "Spring Butterfly", "boss": "Crown Chemical Co." }
+          ] },
+        { "id": "midsummer-ahune", "name": "Ahune (Midsummer Fire Festival)", "zone": "The Frozen Halls (event)", "expansion": "Holiday", "difficulty": "Dungeon Finder, first attempt per account per day", "confidence": "medium",
+          "mounts": [ { "id": 3036, "name": "Sun Festival's Painted Roc", "boss": "Ahune" } ] },
+        { "id": "anniversary-doomwalker", "name": "Doomwalker (Anniversary event)", "zone": "Caverns of Time, Tanaris", "expansion": "Holiday", "difficulty": "Once per character per day, level 30+", "confidence": "medium",
+          "mounts": [ { "id": 1798, "name": "Azure Worldchiller", "boss": "Doomwalker" } ] },
+        { "id": "timewalking-dungeons", "name": "Timewalking dungeon bosses", "zone": "Timewalking dungeons", "expansion": "Holiday", "difficulty": "Any Timewalking dungeon, only during Timewalking weeks", "confidence": "low",
+          "note": "Daily dungeon lockout assumed; check whether the drop is per boss or per lockout.",
+          "mounts": [ { "id": 781, "name": "Infinite Timereaver", "boss": "Any Timewalking dungeon boss" } ] }
+      ]
+    }
+  ],
+  "excluded": [
+    { "reason": "Normal-difficulty dungeon bosses with no lockout (farmable any time, not a daily/weekly kill)", "mounts": [ { "id": 69, "name": "Rivendare's Deathcharger" }, { "id": 395, "name": "Drake of the North Wind" }, { "id": 397, "name": "Vitreous Stone Drake" } ] },
+    { "reason": "Limited-time / no longer obtainable", "mounts": [ { "id": 764, "name": "Grove Warden" } ] },
+    { "reason": "Spawned by players or event conditions, no lockout", "mounts": [ { "id": 1391, "name": "Loyal Gorger" } ] },
+    { "reason": "Open-world rares with respawn timers only (about 80 mounts in data, e.g. Time-Lost Proto-Drake, Huolon, Zandalari Warbringer direhorns, Draenor/Argus/Shadowlands/Korthia/Midnight rares) - not lockout-gated; add if you want a separate 'rares' view", "mounts": [ { "id": 265, "name": "Time-Lost Proto-Drake" }, { "id": 561, "name": "Thundering Onyx Cloud Serpent" }, { "id": 534, "name": "Amber Primordial Direhorn" } ] },
+    { "reason": "Chance loot from Chrono-Lord Deios in Dawn of the Infinite covers 16 older dungeon mounts; lockout cadence and exact mechanic unclear, needs in-game check", "mounts": [] },
+    { "reason": "Weekly-quest chance rewards, not kills (e.g. Dreamseeds weekly, Gold Victory satchels, Ecological Succession cache, Time Rift bosses)", "mounts": [] }
+  ]
+}

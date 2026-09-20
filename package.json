@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build:mounts": "node --env-file=.env.local scripts/build-mounts.mjs"
+    "build:mounts": "node --env-file=.env.local scripts/build-mounts.mjs",
+    "check:farmables": "node scripts/check-farmables.mjs"
   },
   "dependencies": {
     "next": "16.3.4",

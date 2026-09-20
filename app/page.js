@@ -6,16 +6,20 @@ import SearchBar from "@/components/SearchBar";
 import FilterBar from "@/components/FilterBar";
 import CollectionSummary from "@/components/CollectionSummary";
 import MountGrid from "@/components/MountGrid";
+import DailiesView from "@/components/DailiesView";
 
 export default function Home() {
+  const [view, setView] = useState("collection"); // "collection" | "dailies"
   const [ownedIds, setOwnedIds] = useState(null);
   const [faction, setFaction] = useState(null);
+  const [character, setCharacter] = useState(null); // { region, realm, name } of the shown scan
   const [filter, setFilter] = useState("all");
   const [showRetired, setShowRetired] = useState(true);
 
   const handleScanResult = useCallback((result) => {
     setOwnedIds(result ? new Set(result.ownedIds) : null);
     setFaction(result?.faction ?? null);
+    setCharacter(result?.character ?? null);
   }, []);
 
   // Mounts relevant to the scanned character - excludes the opposing
@@ -57,21 +61,46 @@ export default function Home() {
   return (
     <main>
       <h1>WoW Mount Collection Tracker</h1>
-      <CollectionSummary
-        total={total}
-        collected={collected}
-        unobtainableOwned={unobtainableOwned}
-        retiredCount={retiredCount}
-      />
+      <div className="view-tabs" role="tablist">
+        {[
+          ["collection", "Collection"],
+          ["dailies", "Dailies"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={view === value}
+            className={`view-tab${view === value ? " active" : ""}`}
+            onClick={() => setView(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {view === "collection" ? (
+        <CollectionSummary
+          total={total}
+          collected={collected}
+          unobtainableOwned={unobtainableOwned}
+          retiredCount={retiredCount}
+        />
+      ) : null}
       <SearchBar onScanResult={handleScanResult} />
-      <FilterBar
-        filter={filter}
-        onFilterChange={setFilter}
-        disabled={!ownedIds}
-        showRetired={showRetired}
-        onShowRetiredChange={setShowRetired}
-      />
-      <MountGrid mounts={filteredMounts} ownedIds={ownedIds} />
+      {view === "collection" ? (
+        <>
+          <FilterBar
+            filter={filter}
+            onFilterChange={setFilter}
+            disabled={!ownedIds}
+            showRetired={showRetired}
+            onShowRetiredChange={setShowRetired}
+          />
+          <MountGrid mounts={filteredMounts} ownedIds={ownedIds} />
+        </>
+      ) : (
+        <DailiesView ownedIds={ownedIds} faction={faction} character={character} />
+      )}
     </main>
   );
 }

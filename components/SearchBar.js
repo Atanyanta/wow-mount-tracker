@@ -54,7 +54,11 @@ export default function SearchBar({ onScanResult }) {
       setName(last.name || "");
       const cached = readCache(last);
       if (cached) {
-        onScanResult({ ownedIds: new Set(cached.ownedIds), faction: cached.faction ?? null });
+        onScanResult({
+          ownedIds: new Set(cached.ownedIds),
+          faction: cached.faction ?? null,
+          character: { region: last.region || "us", realm: last.realm || "", name: last.name || "" },
+        });
         setLastFetchedAt(cached.fetchedAt);
         setStatus({
           type: "info",
@@ -94,7 +98,7 @@ export default function SearchBar({ onScanResult }) {
         return;
       }
       writeCache(query, data.ownedIds, data.faction);
-      onScanResult({ ownedIds: new Set(data.ownedIds), faction: data.faction ?? null });
+      onScanResult({ ownedIds: new Set(data.ownedIds), faction: data.faction ?? null, character: query });
       const now = Date.now();
       setLastFetchedAt(now);
       setStatus({

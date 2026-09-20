@@ -133,6 +133,46 @@ reason about than it was worth. If revisited, the underlying fact still
 holds: Blizzard's public API does *not* include those auto-granted mirror
 mounts, only the in-game client does.
 
+## Dailies tab (repeatable kills on a daily/weekly lockout)
+
+A second view next to Collection (toggle in `app/page.js`) listing only the
+mounts the scanned character is missing that drop from **kills** on a
+daily/weekly lockout: raid bosses (weekly), world bosses (weekly), heroic and
+Mythic 0 dungeons (daily), Tanaan elites / Theater of Pain (daily), and
+event-only holiday bosses (daily while the event runs). Scope is kills only -
+open-world rares (respawn timers, no lockout) and weekly-quest chance rewards
+are deliberately excluded (see the `excluded` list in the data).
+
+- **`data/farmables.json`** - hand-audited, grouped by cadence/type, one entry
+  per activity with its mounts (`id` + `name` + boss + difficulty) and a
+  `confidence` (high/medium/low). `mounts.json` has no cadence field, only free
+  text, and a regex over it misfiled ~30% (achievement/vendor mounts as kills,
+  Return to Karazhan as heroic, etc.), so this is curated by hand, not derived.
+- **`npm run check:farmables`** (`scripts/check-farmables.mjs`) - validates every
+  id/name against `mounts.json` and regenerates `docs/farmables-review.md`, a
+  grouped review sheet with each mount's raw source text beside it. Run it
+  after editing the JSON; it exits 1 on any mismatch.
+- **`lib/farmables.js`** - `resolveFarmables()`, pure (data passed in). A mount
+  is owned if *any* mount with the same name is owned (faction twins like
+  Grand Black War Mammoth 286/287); opposing-faction unowned mounts are
+  dropped once the faction is known. No Blizzard calls - ownership comes from
+  the already-cached scan.
+- **`lib/resets.js`** - per-region reset schedule (`RESET_SCHEDULES`) and
+  `getPeriodId` / `getNextReset`. "Done" checkmarks are stored per character
+  in localStorage as `{ activityId: { cadence, period } }` and only count while
+  `period` equals the current reset period id, so they expire at the region's
+  server reset with no cleanup job (US = the scanned character's region:
+  daily 15:00 UTC, weekly Tue 15:00 UTC; EU 04:00 UTC / Wed; KR+TW 23:00 UTC /
+  Wed). Times are treated as **fixed UTC** - sources disagreed on DST; if a
+  reset ever looks an hour off, fix `RESET_SCHEDULES` (verify in game with
+  `/run print(C_DateAndTime.GetSecondsUntilDailyReset(), C_DateAndTime.GetSecondsUntilWeeklyReset())`).
+- **`components/DailiesView.js`** - UI. `SearchBar` now passes
+  `character: { region, realm, name }` up with each scan result so the tab
+  knows which region's reset to use and where to store completion.
+
+Midnight (12.x) entries are marked medium/low confidence: that content post-dates
+the research and its lockouts weren't independently verified.
+
 ## Secrets
 
 `BLIZZARD_CLIENT_ID` / `BLIZZARD_CLIENT_SECRET` in `.env.local` (gitignored,
