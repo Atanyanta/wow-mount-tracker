@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getClientCredentialsToken, blizzardFetch } from "@/lib/blizzard";
-import { toSlug } from "@/lib/slug";
 
 const REGIONS = new Set(["us", "eu", "kr", "tw"]);
 const REGION_LOCALES = { us: "en_US", eu: "en_GB", kr: "ko_KR", tw: "zh_TW" };
+
+function toSlug(input) {
+  return input.trim().toLowerCase().replace(/'/g, "").replace(/\s+/g, "-");
+}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

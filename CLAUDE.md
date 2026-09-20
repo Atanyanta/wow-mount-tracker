@@ -133,7 +133,7 @@ reason about than it was worth. If revisited, the underlying fact still
 holds: Blizzard's public API does *not* include those auto-granted mirror
 mounts, only the in-game client does.
 
-## Usable count and rankings
+## Usable count
 
 - **Usable count**: the same `collections/mounts` response that gives owned
   mounts also has `is_useable` per entry (whether *this character* can use it -
@@ -143,13 +143,11 @@ mounts, only the in-game client does.
   non-retired set as `collected` (matches missingmounts.com's "usable" figure).
   Scans cached before this existed have no `usableIds`; the summary says
   "rescan to see usable count" instead of auto-calling Blizzard.
-- **World/region/server rankings are NOT computable here.** Blizzard's API has
-  no leaderboard. missingmounts.com ranks only characters its own users have
-  scanned ("indexed" - ~165k globally, so ranks shift as others scan); Data
-  for Azeroth ranks characters uploaded through its own addon. Neither has a
-  public API, and missingmounts sits behind Cloudflare, so the summary just
-  links to the character's page (`/<region>/<realm-slug>/<name-slug>` - slugs
-  via `lib/slug.js`). Don't fake a rank from locally scanned characters.
+- **No rankings, by design.** World/region/server ranks were investigated and
+  dropped: Blizzard's API has no leaderboard, and the sites that show ranks
+  (missingmounts.com, Data for Azeroth) only rank characters their own users
+  scanned/uploaded. The user does not want to depend on third-party scans, so
+  don't add rank features or links to those sites.
 
 ## Dailies tab (repeatable kills on a daily/weekly lockout)
 

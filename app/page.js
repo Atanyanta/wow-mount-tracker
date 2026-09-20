@@ -91,7 +91,6 @@ export default function Home() {
           usable={usable}
           unobtainableOwned={unobtainableOwned}
           retiredCount={retiredCount}
-          character={character}
         />
       ) : null}
       <SearchBar onScanResult={handleScanResult} />

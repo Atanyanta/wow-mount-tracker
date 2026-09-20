@@ -63,11 +63,6 @@ main {
   margin-bottom: 1rem;
 }
 
-.summary-link {
-  text-decoration: underline;
-  font-weight: 400;
-}
-
 .site-disclaimer {
   font-size: 0.75rem;
   opacity: 0.6;
