@@ -70,7 +70,7 @@ lines.push("");
 for (const group of farmables.groups) {
   lines.push(`## ${group.title}`);
   lines.push("");
-  lines.push(`Cadence: **${group.cadence}**${group.eventOnly ? " (event-only)" : ""}`);
+  lines.push(`Cadence: **${group.cadence}**`);
   lines.push("");
   for (const act of group.activities) {
     lines.push(`### ${act.name}`);

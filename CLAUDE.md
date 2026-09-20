@@ -136,14 +136,16 @@ mounts, only the in-game client does.
 ## Dailies tab (repeatable kills on a daily/weekly lockout)
 
 A second view next to Collection (toggle in `app/page.js`) listing only the
-mounts the scanned character is missing that drop from **kills** on a
-daily/weekly lockout: raid bosses (weekly), world bosses (weekly), heroic and
-Mythic 0 dungeons (daily), Tanaan elites / Theater of Pain (daily), and
-event-only holiday bosses (daily while the event runs). Scope is kills only -
-open-world rares (respawn timers, no lockout) and weekly-quest chance rewards
-are deliberately excluded (see the `excluded` list in the data).
+mounts the scanned character is missing that drop from **dungeon bosses, raid
+bosses and world bosses** on a daily/weekly lockout: raids (weekly), world
+bosses (weekly), heroic and Mythic 0 dungeons (daily). Scope is deliberately
+limited to those three types at the user's request - holiday bosses, Tanaan
+elites, Theater of Pain, K'aresh swarm bosses, open-world rares (respawn timers,
+no lockout) and weekly-quest chance rewards are all in the `excluded` list of
+`data/farmables.json` (with mount ids) in case they're ever wanted back.
 
-- **`data/farmables.json`** - hand-audited, grouped by cadence/type, one entry
+- **`data/farmables.json`** - hand-audited, grouped by cadence and type (raid,
+  world boss, heroic dungeon, Mythic 0 dungeon), one entry
   per activity with its mounts (`id` + `name` + boss + difficulty) and a
   `confidence` (high/medium/low). `mounts.json` has no cadence field, only free
   text, and a regex over it misfiled ~30% (achievement/vendor mounts as kills,

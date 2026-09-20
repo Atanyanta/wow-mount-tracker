@@ -1,5 +1,5 @@
 {
-  "_readme": "Hand-audited list of mounts farmable from repeatable kills on a daily/weekly lockout. Keyed by Blizzard mount id (same ids as data/mounts.json). Edit this file to fix or extend; run `npm run check:farmables` to validate ids/names and regenerate docs/farmables-review.md. cadence: daily|weekly (resets per region, see lib/resets.js). eventOnly groups are only farmable while the holiday/event is live. confidence: high = confirmed by Wowhead's daily/weekly guide or in-data notes; medium = rule inferred (see note); low = unverified, please check in game.",
+  "_readme": "Hand-audited list of mounts farmable from dungeon bosses, raid bosses and world bosses on a daily/weekly lockout. Keyed by Blizzard mount id (same ids as data/mounts.json). Edit this file to fix or extend; run `npm run check:farmables` to validate ids/names and regenerate docs/farmables-review.md. cadence: daily|weekly (resets per region, see lib/resets.js). Holiday bosses and other open-world kills are intentionally excluded (see the excluded list). confidence: high = confirmed by Wowhead's daily/weekly guide or in-data notes; medium = rule inferred (see note); low = unverified, please check in game.",
   "groups": [
     {
       "id": "weekly-raids",
@@ -148,17 +148,6 @@
       ]
     },
     {
-      "id": "weekly-other",
-      "title": "Weekly - Other kills",
-      "cadence": "weekly",
-      "type": "open-world",
-      "activities": [
-        { "id": "devourer-swarms", "name": "Devourer Swarm bosses", "zone": "K'aresh", "expansion": "The War Within", "difficulty": "Event boss, warband-wide weekly cap", "confidence": "medium",
-          "note": "Mount is assembled from 20 Devoured Energy-Pods; each of the four swarm bosses drops one pod per week for your warband (max 4 per week, so at least 5 weeks).",
-          "mounts": [ { "id": 2602, "name": "Translocated Gorger", "boss": "Devourer Swarm final bosses" } ] }
-      ]
-    },
-    {
       "id": "daily-heroic-dungeons",
       "title": "Daily - Heroic dungeons",
       "cadence": "daily",
@@ -225,63 +214,12 @@
           "note": "Midnight dungeon (post my knowledge cutoff), same caveat as Windrunner Spire.",
           "mounts": [ { "id": 2817, "name": "Lucent Hawkstrider", "boss": "Degentrius" } ] }
       ]
-    },
-    {
-      "id": "daily-other",
-      "title": "Daily - Other kills",
-      "cadence": "daily",
-      "type": "open-world",
-      "activities": [
-        { "id": "tanaan-elites", "name": "Tanaan Jungle rare elites", "zone": "Tanaan Jungle", "expansion": "Warlords of Draenor", "difficulty": "Open world, personal loot", "confidence": "high",
-          "note": "warcraftmounts: 'each elite yields personal loot once per day'. Same three mounts drop from Vengeance, Deathtalon, Terrorfist and Doomroller.",
-          "mounts": [
-            { "id": 611, "name": "Tundra Icehoof", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" },
-            { "id": 622, "name": "Armored Razorback", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" },
-            { "id": 643, "name": "Warsong Direfang", "boss": "Vengeance / Deathtalon / Terrorfist / Doomroller" }
-          ] },
-        { "id": "theater-of-pain", "name": "Theater of Pain rotating bosses", "zone": "Maldraxxus", "expansion": "Shadowlands", "difficulty": "Arena content, 4 bosses per day", "confidence": "medium",
-          "note": "warcraftmounts: one loot chance per boss per day; bosses rotate daily (Azmogal, Devmorta, Xantuth, Urtz, Ti'or, Mistress Dyrax).",
-          "mounts": [ { "id": 1437, "name": "Battle-Bound Warhound", "boss": "Theater of Pain bosses" } ] }
-      ]
-    },
-    {
-      "id": "event-holiday-bosses",
-      "title": "Event only - Holiday bosses (daily while the event runs)",
-      "cadence": "daily",
-      "type": "holiday-boss",
-      "eventOnly": true,
-      "activities": [
-        { "id": "brewfest", "name": "Coren Direbrew (Brewfest)", "zone": "Blackrock Depths (event dungeon)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
-          "note": "Brewfest Bomber is limited to your first attempt per account per day.",
-          "mounts": [
-            { "id": 202, "name": "Swift Brewfest Ram", "boss": "Coren Direbrew" },
-            { "id": 226, "name": "Great Brewfest Kodo", "boss": "Coren Direbrew" },
-            { "id": 2640, "name": "Brewfest Bomber", "boss": "Coren Direbrew" }
-          ] },
-        { "id": "hallows-end", "name": "The Headless Horseman (Hallow's End)", "zone": "Scarlet Monastery (event version)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
-          "mounts": [
-            { "id": 219, "name": "Headless Horseman's Mount", "boss": "The Headless Horseman" },
-            { "id": 2623, "name": "The Headless Horseman's Ghoulish Charger", "boss": "The Headless Horseman" }
-          ] },
-        { "id": "love-is-in-the-air", "name": "Crown Chemical Co. (Love is in the Air)", "zone": "Shadowfang Keep (event version)", "expansion": "Holiday", "difficulty": "Dungeon Finder, once per day", "confidence": "medium",
-          "note": "Notes say the mount may only drop from the first box per account.",
-          "mounts": [
-            { "id": 352, "name": "X-45 Heartbreaker", "boss": "Crown Chemical Co." },
-            { "id": 2328, "name": "Love Witch's Sweeper", "boss": "Crown Chemical Co." },
-            { "id": 2492, "name": "Spring Butterfly", "boss": "Crown Chemical Co." }
-          ] },
-        { "id": "midsummer-ahune", "name": "Ahune (Midsummer Fire Festival)", "zone": "The Frozen Halls (event)", "expansion": "Holiday", "difficulty": "Dungeon Finder, first attempt per account per day", "confidence": "medium",
-          "mounts": [ { "id": 3036, "name": "Sun Festival's Painted Roc", "boss": "Ahune" } ] },
-        { "id": "anniversary-doomwalker", "name": "Doomwalker (Anniversary event)", "zone": "Caverns of Time, Tanaris", "expansion": "Holiday", "difficulty": "Once per character per day, level 30+", "confidence": "medium",
-          "mounts": [ { "id": 1798, "name": "Azure Worldchiller", "boss": "Doomwalker" } ] },
-        { "id": "timewalking-dungeons", "name": "Timewalking dungeon bosses", "zone": "Timewalking dungeons", "expansion": "Holiday", "difficulty": "Any Timewalking dungeon, only during Timewalking weeks", "confidence": "low",
-          "note": "Daily dungeon lockout assumed; check whether the drop is per boss or per lockout.",
-          "mounts": [ { "id": 781, "name": "Infinite Timereaver", "boss": "Any Timewalking dungeon boss" } ] }
-      ]
     }
   ],
   "excluded": [
     { "reason": "Normal-difficulty dungeon bosses with no lockout (farmable any time, not a daily/weekly kill)", "mounts": [ { "id": 69, "name": "Rivendare's Deathcharger" }, { "id": 395, "name": "Drake of the North Wind" }, { "id": 397, "name": "Vitreous Stone Drake" } ] },
+    { "reason": "Holiday / event bosses (removed by request: only dungeon, raid and world bosses are tracked). Brewfest, Hallow's End, Love is in the Air, Midsummer, Anniversary Doomwalker, Timewalking dungeon boss", "mounts": [ { "id": 202, "name": "Swift Brewfest Ram" }, { "id": 226, "name": "Great Brewfest Kodo" }, { "id": 2640, "name": "Brewfest Bomber" }, { "id": 219, "name": "Headless Horseman's Mount" }, { "id": 2623, "name": "The Headless Horseman's Ghoulish Charger" }, { "id": 352, "name": "X-45 Heartbreaker" }, { "id": 2328, "name": "Love Witch's Sweeper" }, { "id": 2492, "name": "Spring Butterfly" }, { "id": 3036, "name": "Sun Festival's Painted Roc" }, { "id": 1798, "name": "Azure Worldchiller" }, { "id": 781, "name": "Infinite Timereaver" } ] },
+    { "reason": "Other daily/weekly kills that are not a dungeon, raid or world boss (removed by request): Tanaan Jungle rare elites (daily personal loot), Theater of Pain rotating bosses (daily), K'aresh Devourer Swarm bosses (weekly, warband-wide cap of 4 pods)", "mounts": [ { "id": 611, "name": "Tundra Icehoof" }, { "id": 622, "name": "Armored Razorback" }, { "id": 643, "name": "Warsong Direfang" }, { "id": 1437, "name": "Battle-Bound Warhound" }, { "id": 2602, "name": "Translocated Gorger" } ] },
     { "reason": "Limited-time / no longer obtainable", "mounts": [ { "id": 764, "name": "Grove Warden" } ] },
     { "reason": "Spawned by players or event conditions, no lockout", "mounts": [ { "id": 1391, "name": "Loyal Gorger" } ] },
     { "reason": "Open-world rares with respawn timers only (about 80 mounts in data, e.g. Time-Lost Proto-Drake, Huolon, Zandalari Warbringer direhorns, Draenor/Argus/Shadowlands/Korthia/Midnight rares) - not lockout-gated; add if you want a separate 'rares' view", "mounts": [ { "id": 265, "name": "Time-Lost Proto-Drake" }, { "id": 561, "name": "Thundering Onyx Cloud Serpent" }, { "id": 534, "name": "Amber Primordial Direhorn" } ] },

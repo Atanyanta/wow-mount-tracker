@@ -107,7 +107,7 @@ export default function DailiesView({ ownedIds, faction, character }) {
       if (a.remaining === 0) continue;
       missingMounts += a.remaining;
       missingActivities += 1;
-      if (!g.eventOnly && !isDone(done, a, g.cadence, region, now)) leftThisReset += 1;
+      if (!isDone(done, a, g.cadence, region, now)) leftThisReset += 1;
     }
   }
 
@@ -200,7 +200,7 @@ export default function DailiesView({ ownedIds, faction, character }) {
                       disabled={!key}
                       onChange={(e) => toggleDone(activity, group.cadence, e.target.checked)}
                     />
-                    {group.eventOnly ? "Done today" : `Done this ${group.cadence === "daily" ? "day" : "week"}`}
+                    {`Done this ${group.cadence === "daily" ? "day" : "week"}`}
                   </label>
                 </article>
               );
