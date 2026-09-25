@@ -22,7 +22,7 @@
   {
     "name": "scan completes; summary shows collected/total",
     "ok": true,
-    "detail": "796 / 1460 mounts collected (+1 unobtainable) (55%) · 727 usable on th"
+    "detail": "799 / 1460 mounts collected (+1 unobtainable) (55%) · 730 usable on th"
   },
   {
     "name": "Collected/Uncollected enabled after scan",

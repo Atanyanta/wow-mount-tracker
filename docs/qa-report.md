@@ -10,7 +10,7 @@ Scripts, raw results and screenshots referenced below are in [`docs/qa/`](qa/).
 | Data integrity, API, **realm list**, pure logic (Node) | Pass | 22 / 22 (+ 28 realm-library unit checks inside them) |
 | Full UI in **Chrome** - dev server | Pass | 69 / 69 (91 / 91 with the Node checks) |
 | Full UI in **Chrome** - production build | Pass | 91 / 91 |
-| Full UI in **Firefox 156** - dev server | Pass | 47 / 47 |
+| Full UI in **Firefox 156** - dev server | Pass | 48 / 48 |
 | Full UI in **Firefox 156** - production build | Pass | 47 / 47 |
 | Memory / leak test (client, server) | No leak found | 4 measured cycles + server stress (run before the realm feature; the combobox holds no timers or global listeners) |
 | Security (secret exposure, input validation, `npm audit`) | Pass after 1 fix | 0 vulnerabilities |
@@ -20,7 +20,7 @@ Unexpected console errors or failed network requests across every run: **0**.
 
 ## 2. Environment and method
 
-- **Machine:** Windows 10, Node 24.15, Next.js 16.3.4 (Turbopack), React 19.2.8.
+- **Machine:** Windows 10, Node 24.15, Next.js 16.3.6 (Turbopack), React 19.3.0 (runs 1-17 used Next.js 16.3.4 / React 19.2.8).
 - **Chrome:** a headless Chrome launched per run with a throwaway profile, driven over the DevTools protocol using **real mouse and keyboard events** (clicks, hovers, Tab, Enter, Space, arrows). It is not your visible Chrome window, and the Chrome extension was not used.
 - **Firefox:** the installed Firefox 156, headless, throwaway profile, driven over **WebDriver BiDi** (its native automation protocol). Firefox is the browser you actually use, and it is where the reported hydration error came from.
 - **Expected values are computed independently** from `data/mounts.json` and the live Blizzard API response, not copied from what the page shows. Example: the expected collected/total/usable/retired counts, the number of icons rendered, and the number of hidden opposing-faction mounts are all derived in the test from raw data.
@@ -108,6 +108,7 @@ The realm field used to be free text, so a typo or a differently punctuated real
 | 15 | Firefox with realm block | 46 / 47 | Scripted `.focus()` does not dispatch focus events in an unfocused headless window; the check now clicks the field like a user. |
 | 16 | Firefox / Chrome vs **production** | **47 / 47** and **91 / 91** | |
 | 17 | 2026-09-24, Dailies Done button + Completed section (dev) | **91 / 91** and **48 / 48** | Checkbox replaced by Done/Undo buttons; Dailies test rewritten (card moves to Completed and back, Undo, hide, reload, reset expiry); Firefox gained an Undo check. |
+| 18 | 2026-09-25, after upgrading to Next.js 16.3.6 / React 19.3.0 (dev; `npm run build` and lint also clean) | **91 / 91** and **48 / 48** | No regressions. The Firefox run removed its throwaway profile (an earlier interrupted run had left one behind, which is now git-ignored). |
 
 ## 5. Bugs found and fixed
 
@@ -195,7 +196,7 @@ Scripts live in `docs/qa/` and use absolute paths for this machine (`ROOT` at th
 ```
 npm run dev                                # server on :3000
 node docs/qa/qa.mjs                        # Node + Chrome suite (91 checks; runs realms-unit.mjs too)
-node docs/qa/ff.mjs                        # Firefox suite (47 checks)
+node docs/qa/ff.mjs                        # Firefox suite (48 checks)
 node docs/qa/realms-unit.mjs               # realm lookup/search library on its own (28 checks)
 node docs/qa/leak.mjs 4                    # client memory-leak test, 4 measured cycles
 npm run build:realms                       # refresh data/realms.json from Blizzard (needs .env.local)

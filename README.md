@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WoW Mount Collection Tracker
 
-## Getting Started
+A personal Next.js app that shows every World of Warcraft mount as an icon,
+grouped by expansion, patch and source, with PvP and Trading Post mounts in
+their own sections. Scan a character to mark owned mounts and see collected /
+usable counts, and use the **Dailies** tab to track missing mounts from
+dungeon, raid and world bosses on a daily or weekly lockout.
 
-First, run the development server:
+Mount data, icons and tooltips are built ahead of time into `data/` and
+`public/icons/`, so the page makes no external calls except the character scan.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Setup
+
+Needs Node 24 and a Blizzard API client ([develop.battle.net](https://develop.battle.net/access/clients)).
+
+```
+npm install
+copy .env.example .env.local   # then fill in BLIZZARD_CLIENT_ID / BLIZZARD_CLIENT_SECRET
+npm run dev                    # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+| Command | What it does |
+| --- | --- |
+| `npm run dev` / `build` / `start` | Next.js dev server, production build, production server |
+| `npm run lint` | ESLint |
+| `npm run build:mounts` | Rebuilds `data/mounts.json` and `public/icons/` (Blizzard API + warcraftmounts.com + Wowhead). Run after a new WoW patch. |
+| `npm run build:realms` | Rebuilds `data/realms.json` from Blizzard's realm index. Run when realms are added or renamed. |
+| `npm run check:farmables` | Validates `data/farmables.json` and regenerates `docs/farmables-review.md` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docs
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `CLAUDE.md` - architecture, data pipeline and known gotchas
+- `docs/themes.md` - theme system
+- `docs/qa-report.md` and `docs/qa/` - QA record and runnable test suites
