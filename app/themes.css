@@ -1,0 +1,1030 @@
+/* Themes. Every option here is selected by a data-* attribute on <html>,
+   set from the active theme (lib/themes.js) plus any overrides from the
+   Customize panel (lib/themeStore.js). Axis options are listed in
+   lib/styleOptions.js; a missing attribute on any axis except `palette`
+   means the original plain look from globals.css.
+   Loaded after globals.css; selectors are prefixed with `html` so they win.
+
+   Axes: palette / type / dividers / cards / owned / progress.
+   See docs/themes.md. */
+
+/* ------------------------------------------------------------------ */
+/* Shared variables. Defaults reproduce the original look exactly.     */
+/* ------------------------------------------------------------------ */
+:root {
+  --accent: #b8860b;
+  --line: rgba(128, 128, 128, 0.3);
+  --line-soft: rgba(128, 128, 128, 0.2);
+  --panel: rgba(128, 128, 128, 0.06);
+  --panel-2: rgba(128, 128, 128, 0.12);
+  --owned: #2ecc71;
+  --on-owned: #08210f;
+  --tip-bg: #1a1a2e;
+  --tip-border: #4a4030;
+  --tip-title: #ffd100;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #ffd100;
+  }
+}
+
+html .search-bar,
+html .filter-bar,
+html .farm-card {
+  border-color: var(--line);
+}
+html .source-card {
+  border-color: var(--line-soft);
+}
+html .view-bar,
+html .expansion-heading {
+  border-bottom-color: var(--line);
+}
+html .expansion-section.crosscut-section {
+  border-top-color: var(--line);
+}
+html .mount-tooltip {
+  background: var(--tip-bg);
+  border-color: var(--tip-border);
+}
+html .mount-tooltip-name {
+  color: var(--tip-title);
+}
+.mount-tooltip-owned {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--tip-title);
+}
+
+/* ------------------------------------------------------------------ */
+/* PALETTE                                                             */
+/* ------------------------------------------------------------------ */
+html[data-palette] {
+  --heading: var(--accent);
+}
+html[data-palette] body {
+  background: radial-gradient(ellipse 90% 55% at 50% 0%, var(--bg-glow), transparent) fixed,
+    var(--background);
+}
+html[data-palette] :is(h1, .expansion-heading) {
+  color: var(--heading);
+}
+html[data-palette] .view-tab.active {
+  border-bottom-color: var(--accent);
+}
+html[data-palette] .collection-summary {
+  color: var(--heading);
+}
+
+/* Dark is the default theme and reproduces the original dark look. */
+html[data-palette="dark"] {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --bg-glow: transparent;
+  --accent: #ffd100;
+  --heading: var(--foreground);
+  --owned: #ffd100;
+  --on-owned: #1a1200;
+}
+
+html[data-palette="gold"] {
+  color-scheme: dark;
+  --background: #15110b;
+  --foreground: #eadfc6;
+  --bg-glow: rgba(190, 140, 40, 0.16);
+  --accent: #e8b923;
+  --heading: #f3d67a;
+  --line: rgba(214, 170, 80, 0.32);
+  --line-soft: rgba(214, 170, 80, 0.2);
+  --panel: #1e1810;
+  --panel-2: #2a2115;
+  --owned: #e8b923;
+  --on-owned: #1a1205;
+  --tip-bg: #120e08;
+  --tip-border: #7a5c1e;
+  --tip-title: #ffd100;
+}
+
+html[data-palette="alliance"] {
+  color-scheme: dark;
+  --background: #0a101d;
+  --foreground: #dde6f3;
+  --bg-glow: rgba(50, 90, 170, 0.28);
+  --accent: #d9b44a;
+  --heading: #e9cf85;
+  --line: rgba(96, 140, 215, 0.35);
+  --line-soft: rgba(96, 140, 215, 0.22);
+  --panel: #101a2e;
+  --panel-2: #16233d;
+  --owned: #d9b44a;
+  --on-owned: #101a2e;
+  --tip-bg: #0b1324;
+  --tip-border: #3d5f9c;
+  --tip-title: #e9cf85;
+}
+
+html[data-palette="horde"] {
+  color-scheme: dark;
+  --background: #110b0a;
+  --foreground: #eddcd0;
+  --bg-glow: rgba(150, 40, 20, 0.3);
+  --accent: #e2692b;
+  --heading: #f0a070;
+  --line: rgba(200, 80, 45, 0.38);
+  --line-soft: rgba(200, 80, 45, 0.24);
+  --panel: #1c1210;
+  --panel-2: #291a16;
+  --owned: #e2692b;
+  --on-owned: #1a0a05;
+  --tip-bg: #150c0a;
+  --tip-border: #8a3418;
+  --tip-title: #f0a070;
+}
+
+html[data-palette="void"] {
+  color-scheme: dark;
+  --background: #0d0916;
+  --foreground: #e4dcf2;
+  --bg-glow: rgba(110, 60, 200, 0.3);
+  --accent: #b78cf7;
+  --heading: #d3b8fb;
+  --line: rgba(150, 110, 230, 0.35);
+  --line-soft: rgba(150, 110, 230, 0.22);
+  --panel: #161027;
+  --panel-2: #201738;
+  --owned: #b78cf7;
+  --on-owned: #140a26;
+  --tip-bg: #0f0a1d;
+  --tip-border: #6a4bb0;
+  --tip-title: #d3b8fb;
+}
+
+/* Light: warm parchment. */
+html[data-palette="light"] {
+  color-scheme: light;
+  --background: #efe3c6;
+  --foreground: #2b2013;
+  --bg-glow: rgba(255, 250, 230, 0.85);
+  --accent: #8c5a10;
+  --heading: #5c3a0a;
+  --line: rgba(110, 80, 30, 0.4);
+  --line-soft: rgba(110, 80, 30, 0.25);
+  --panel: #f6ecd3;
+  --panel-2: #e8d9b6;
+  --owned: #b06a12;
+  --on-owned: #ffffff;
+  --tip-bg: #2a2015;
+  --tip-border: #8c5a10;
+  --tip-title: #ffd100;
+}
+
+/* The Dailies cadence pills were tuned for dark backgrounds; darken them on
+   the parchment-coloured Light theme so they stay readable. */
+html[data-palette="light"] .farm-cadence.daily {
+  color: #1c6a9a;
+  border-color: #1c6a9a;
+}
+html[data-palette="light"] .farm-cadence.weekly {
+  color: #9a5a00;
+  border-color: #9a5a00;
+}
+
+/* ------------------------------------------------------------------ */
+/* HEADINGS (type)                                                     */
+/* ------------------------------------------------------------------ */
+html[data-type="serif"] :is(h1, .expansion-heading, .patch-heading, .farm-card-title, .source-heading, .view-tab),
+html[data-type="engraved"] :is(h1, .expansion-heading, .patch-heading, .farm-card-title, .source-heading, .view-tab) {
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+html[data-type="serif"] h1 {
+  font-size: 2.2rem;
+}
+html[data-type="serif"] .expansion-heading {
+  font-size: 1.6rem;
+}
+html[data-type="serif"] .patch-heading {
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+html[data-type="engraved"] :is(h1, .expansion-heading, .farm-card-title, .view-tab) {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+html[data-type="engraved"] h1 {
+  font-size: 1.9rem;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+html[data-type="engraved"] .expansion-heading {
+  font-size: 1.2rem;
+}
+html[data-type="engraved"] .patch-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+html[data-type="engraved"] .farm-card-title {
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+html[data-type="engraved"] .section-count {
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------------------ */
+/* DIVIDERS                                                            */
+/* ------------------------------------------------------------------ */
+
+/* Small diamond bullet before patch headings, shared by all ornate options. */
+html:is([data-dividers="gilded"], [data-dividers="banner"], [data-dividers="band"]) .patch-heading {
+  opacity: 0.9;
+  color: var(--accent);
+}
+html:is([data-dividers="gilded"], [data-dividers="banner"], [data-dividers="band"]) .patch-heading::before {
+  content: "\25C6";
+  font-size: 0.6em;
+  margin-right: 0.55em;
+  vertical-align: 0.2em;
+}
+
+/* Gilded diamond: double hairline that fades at both ends, diamond centre. */
+html[data-dividers="gilded"] :is(h1, .expansion-heading) {
+  position: relative;
+  border-bottom: none;
+  padding-bottom: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+html[data-dividers="gilded"] h1 {
+  text-align: center;
+}
+html[data-dividers="gilded"] :is(h1, .expansion-heading)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  border-style: solid;
+  border-width: 1px 0;
+  border-image: linear-gradient(90deg, transparent, var(--accent) 15%, var(--accent) 85%, transparent) 1;
+}
+html[data-dividers="gilded"] :is(h1, .expansion-heading)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 9px;
+  height: 9px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--accent);
+}
+
+/* Banner rules: title centred, rules fade out to each side with a dot cap. */
+html[data-dividers="banner"] :is(h1, .expansion-heading) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  border-bottom: none;
+  text-align: center;
+}
+html[data-dividers="banner"] :is(h1, .expansion-heading)::before,
+html[data-dividers="banner"] :is(h1, .expansion-heading)::after {
+  content: "";
+  flex: 1;
+  height: 9px;
+}
+html[data-dividers="banner"] :is(h1, .expansion-heading)::before {
+  background: radial-gradient(circle at calc(100% - 4px) 50%, var(--accent) 0 3px, transparent 3.5px),
+    linear-gradient(90deg, transparent, var(--accent)) center / 100% 1px no-repeat;
+}
+html[data-dividers="banner"] :is(h1, .expansion-heading)::after {
+  background: radial-gradient(circle at 4px 50%, var(--accent) 0 3px, transparent 3.5px),
+    linear-gradient(270deg, transparent, var(--accent)) center / 100% 1px no-repeat;
+}
+
+/* Ruled band: title sits in a double-ruled ribbon. */
+html[data-dividers="band"] :is(h1, .expansion-heading) {
+  padding: 0.45rem 0.75rem;
+  text-align: center;
+  border-top: 3px double var(--accent);
+  border-bottom: 3px double var(--accent);
+  background: linear-gradient(90deg, transparent, var(--panel-2), transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* CARDS                                                               */
+/* ------------------------------------------------------------------ */
+html[data-cards] :is(.search-bar, .filter-bar) {
+  background: var(--panel);
+}
+html[data-cards] .source-heading {
+  color: var(--accent);
+  opacity: 0.95;
+}
+
+/* Framed corners: inner hairline plus gilded corner brackets. */
+html[data-cards="framed"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+  background-color: var(--panel);
+  border-radius: 3px;
+}
+html[data-cards="framed"] :is(.source-card, .farm-card) {
+  border-color: var(--line);
+  outline: 1px solid var(--line-soft);
+  outline-offset: -4px;
+  background-image: linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent)),
+    linear-gradient(var(--accent), var(--accent)), linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-size: 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px, 12px 2px, 2px 12px;
+  background-position: left 3px top 3px, left 3px top 3px, right 3px top 3px, right 3px top 3px,
+    left 3px bottom 3px, left 3px bottom 3px, right 3px bottom 3px, right 3px bottom 3px;
+}
+html[data-cards="framed"] :is(.source-card, .farm-card) {
+  padding: 0.75rem;
+}
+
+/* Plaque: gradient slab with a gilded top edge. */
+html[data-cards="plaque"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+  border-radius: 4px;
+  border-top: 2px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+html[data-cards="plaque"] :is(.source-card, .farm-card) {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+}
+
+/* Soft glow: rounded, hairline ring that lights up on hover. */
+html[data-cards="glow"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+  border-color: transparent;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--line), 0 6px 18px rgba(0, 0, 0, 0.22);
+  transition: box-shadow 0.15s;
+}
+html[data-cards="glow"] :is(.source-card, .farm-card) {
+  background: var(--panel);
+}
+html[data-cards="glow"] :is(.source-card, .farm-card):hover {
+  box-shadow: 0 0 0 1px var(--accent), 0 6px 22px rgba(0, 0, 0, 0.3);
+}
+
+/* ------------------------------------------------------------------ */
+/* COLLECTED-MOUNT INDICATOR                                           */
+/* ------------------------------------------------------------------ */
+.mount-owned-badge {
+  display: none;
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--owned);
+  color: var(--on-owned);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--background);
+}
+html:is([data-owned="badge"], [data-owned="ring"], [data-owned="silhouette"]) .mount-owned-badge {
+  display: flex;
+}
+html[data-owned] .mount-icon-clip {
+  transition: filter 0.15s, opacity 0.15s;
+}
+
+/* Dim missing: uncollected fade back, collected glow softly. */
+html[data-owned="dim"] .mount-icon-link.owned .mount-icon-clip {
+  border-color: var(--owned);
+  box-shadow: 0 0 8px -1px var(--owned);
+}
+html[data-owned="dim"] .mount-grid .mount-icon-link.unowned .mount-icon-clip {
+  filter: grayscale(0.9) brightness(0.75);
+  opacity: 0.55;
+}
+html[data-owned="dim"] .mount-grid .mount-icon-link.unowned:hover .mount-icon-clip {
+  filter: none;
+  opacity: 1;
+}
+
+/* Check badge: collected get a corner check, nothing else changes. */
+html[data-owned="badge"] .mount-icon-link.owned .mount-icon-clip {
+  border-color: var(--owned);
+}
+
+/* Glow ring + badge: collected are ringed and glowing, missing are dashed. */
+html[data-owned="ring"] .mount-icon-link.owned .mount-icon-clip {
+  border-color: var(--owned);
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 3px var(--owned), 0 0 8px 0 var(--owned);
+}
+html[data-owned="ring"] .mount-grid .mount-icon-link.unowned .mount-icon-clip {
+  border-style: dashed;
+  filter: grayscale(0.6) brightness(0.85);
+}
+html[data-owned="ring"] .mount-grid .mount-icon-link.unowned:hover .mount-icon-clip {
+  filter: none;
+}
+
+/* Silhouette missing: uncollected are dark shapes until hovered. */
+html[data-owned="silhouette"] .mount-icon-link.owned .mount-icon-clip {
+  border-color: var(--owned);
+}
+html[data-owned="silhouette"] .mount-grid .mount-icon-link.unowned .mount-icon-clip img {
+  filter: grayscale(1) brightness(0.42) contrast(1.15);
+  transition: filter 0.15s;
+}
+html[data-owned="silhouette"] .mount-grid .mount-icon-link.unowned:hover .mount-icon-clip img {
+  filter: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* PROGRESS                                                            */
+/* ------------------------------------------------------------------ */
+.section-count,
+.section-progress,
+.summary-bar {
+  display: none;
+}
+/* "Counts" mode: the count sits beside the section heading. */
+html[data-progress="counts"] .section-count {
+  display: inline-block;
+  margin-left: 0.85rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--foreground);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+html[data-progress="counts"] .section-count.complete {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* "Bars" mode: game-style experience bar with the count inside it - a thick
+   inset track, glossy fill, 20 tick marks, outlined centred label. Used for
+   each section and for the overall summary. */
+html[data-progress="bars"] :is(.section-progress, .summary-bar) {
+  display: block;
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--panel-2) 70%, black);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+html[data-progress="bars"] .section-progress {
+  margin: 0.15rem 0 1.1rem;
+}
+html[data-progress="bars"] .summary-bar {
+  height: 22px;
+  margin-top: 0.5rem;
+}
+html[data-progress="bars"] :is(.section-progress, .summary-bar) .bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--pct);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.28)),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, black), color-mix(in srgb, var(--accent) 88%, black));
+}
+html[data-progress="bars"] :is(.section-progress, .summary-bar)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent calc(5% - 1px), rgba(0, 0, 0, 0.38) calc(5% - 1px), rgba(0, 0, 0, 0.38) 5%);
+}
+html[data-progress="bars"] :is(.section-progress, .summary-bar) .bar-label {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 4px #000;
+}
+html[data-progress="bars"] .section-progress.complete {
+  border-color: var(--accent);
+}
+.bar-label,
+.bar-fill {
+  display: none;
+}
+html[data-progress="bars"] .bar-fill,
+html[data-progress="bars"] .bar-label {
+  display: block;
+}
+html[data-progress="bars"] .bar-label {
+  display: flex;
+}
+
+/* ------------------------------------------------------------------ */
+/* COLLAPSIBLE SECTIONS (all themes)                                   */
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* FILTER BAR, SEGMENTED CONTROL, TOGGLES (all themes)                 */
+/* Colours come from the palette variables, so every theme restyles    */
+/* these automatically. Track/gloss match the XP-style progress bars.  */
+/* ------------------------------------------------------------------ */
+html .filter-bar {
+  gap: 0.6rem 1.75rem;
+  padding: 0.7rem 1rem;
+  background: var(--panel);
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.filter-actions {
+  margin-left: auto;
+  gap: 0.4rem;
+}
+.filter-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+html .filter-bar-hint {
+  flex-basis: 100%;
+  margin-top: -0.15rem;
+}
+
+/* Segmented control (All / Collected / Uncollected). */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--panel-2) 70%, black);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+html .filter-bar .segment {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.segment-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.segment-text {
+  display: block;
+  padding: 0.32rem 0.95rem;
+  border-radius: 3px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  opacity: 0.7;
+  transition: background 0.12s, opacity 0.12s;
+}
+.segment:hover .segment-text {
+  opacity: 1;
+}
+.segment-input:checked + .segment-text {
+  opacity: 1;
+  color: var(--on-owned);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2)),
+    var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.segment-input:focus-visible + .segment-text {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.segment-input:disabled + .segment-text {
+  opacity: 0.35;
+  cursor: default;
+}
+html .filter-bar .segment:has(.segment-input:disabled) {
+  cursor: default;
+}
+
+/* Toggle switch. */
+html .filter-bar .toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+html .filter-bar .toggle.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-2) 70%, black);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: background 0.15s, border-color 0.15s;
+}
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--foreground);
+  opacity: 0.75;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s, background 0.15s, opacity 0.15s;
+}
+.toggle-input:checked + .toggle-track {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2)),
+    var(--accent);
+}
+.toggle-input:checked + .toggle-track .toggle-knob {
+  transform: translateX(18px);
+  background: var(--on-owned);
+  opacity: 1;
+}
+.toggle-input:focus-visible + .toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Dailies "Done" (accent-filled) and "Undo" (outlined) buttons. */
+.farm-done-button {
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--background);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+.farm-done-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.farm-done-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.farm-done-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.farm-done-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.farm-done-button.undo {
+  background: var(--panel-2);
+  border-color: var(--line);
+  color: var(--foreground);
+}
+.farm-done-button.undo:hover {
+  filter: none;
+  border-color: var(--accent);
+}
+
+/* Expand all / Collapse all. The chevrons match the section headings:
+   down = expanded, right = collapsed. */
+.filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.34rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--foreground);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.filter-button:hover {
+  border-color: var(--accent);
+}
+.filter-button:active {
+  transform: translateY(1px);
+}
+.filter-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.filter-button::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.42em;
+  height: 0.42em;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: translateY(-0.1em) rotate(45deg);
+}
+.filter-button.collapse::before {
+  transform: rotate(-45deg);
+}
+
+/* Phones: the "Show" label + three segments are wider than the screen, so let
+   the group wrap, tighten the segments, and let the action buttons wrap too. */
+@media (max-width: 520px) {
+  .filter-group {
+    flex-wrap: wrap;
+  }
+  .filter-actions {
+    margin-left: 0;
+  }
+  .segment-text {
+    padding: 0.32rem 0.55rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+  .segmented {
+    max-width: 100%;
+  }
+}
+
+/* The toggle is a button inside the heading so it works with every divider
+   style; it inherits the heading's font, colour and casing. */
+.section-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.section-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.section-toggle::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: translateY(-0.1em) rotate(45deg);
+  transition: transform 0.15s;
+}
+.section-toggle[aria-expanded="false"]::before {
+  transform: rotate(-45deg);
+}
+/* A collapsed section keeps its heading and progress bar as a summary line. */
+.expansion-section.collapsed {
+  margin-bottom: 1.25rem;
+}
+.expansion-section.collapsed .expansion-heading {
+  margin-bottom: 0.5rem;
+}
+.expansion-section.collapsed .section-progress {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* STYLE PICKER (temporary scaffolding)                                */
+/* ------------------------------------------------------------------ */
+.style-picker {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-family: Arial, Helvetica, sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.style-picker button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  border-radius: 4px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.style-picker button:hover {
+  border-color: #ffd100;
+}
+.style-picker button[aria-pressed="true"] {
+  background: #ffd100;
+  border-color: #ffd100;
+  color: #111;
+  font-weight: 700;
+}
+.style-picker-toggle {
+  padding: 0.5rem 0.9rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 700;
+  border-radius: 999px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+.style-picker-panel {
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.style-picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.style-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+.style-picker-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+.style-picker-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.style-picker-mix {
+  display: block;
+  max-width: 100%;
+  font-size: 0.72rem;
+  word-break: break-word;
+  user-select: all;
+  opacity: 0.85;
+}
+.style-picker-hint {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+.style-picker button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* Dashed outline = what the active theme picks by default for that axis. */
+.style-picker button.is-theme-default:not([aria-pressed="true"]) {
+  border-style: dashed;
+}
+
+/* ------------------------------------------------------------------ */
+/* THEME SWITCHER (header)                                             */
+/* ------------------------------------------------------------------ */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-bottom: 0.45rem;
+  font-size: 0.78rem;
+}
+.theme-switcher-name {
+  margin-right: 0.3rem;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+.theme-chip {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(128, 128, 128, 0.6);
+  background: linear-gradient(135deg, var(--chip-bg) 50%, var(--chip-accent) 50%);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.theme-chip:hover {
+  transform: scale(1.15);
+}
+.theme-chip[aria-checked="true"],
+.theme-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* REALM COMBOBOX (type-ahead in the search bar; all themes)           */
+/* ------------------------------------------------------------------ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.realm-combobox {
+  position: relative;
+  display: inline-block;
+}
+.realm-combobox input[aria-invalid="true"] {
+  border-color: #d9534f;
+}
+.realm-listbox {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: min(22rem, 90vw);
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  border-radius: 4px;
+  /* opaque: the base colour, tinted with the panel colour on top */
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel-2), var(--panel-2));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.realm-option {
+  padding: 0.38rem 0.65rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.realm-option.active {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+.realm-option.current {
+  font-weight: 700;
+  color: var(--accent);
+}
+.realm-empty {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}

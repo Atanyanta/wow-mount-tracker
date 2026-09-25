@@ -14,6 +14,12 @@ export default function CollectionSummary({ total, collected, usable, unobtainab
       {unobtainableOwned > 0 ? ` (+${unobtainableOwned} unobtainable)` : ""} ({pct}%)
       {usable != null ? ` · ${usable} usable on this character` : " · rescan to see usable count"}
       {retiredNote}
+      <span className="summary-bar" aria-hidden="true">
+        <span className="bar-fill" style={{ "--pct": `${pct}%` }} />
+        <span className="bar-label">
+          {collected} / {total} · {pct}%
+        </span>
+      </span>
     </p>
   );
 }

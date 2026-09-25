@@ -7,6 +7,9 @@ import FilterBar from "@/components/FilterBar";
 import CollectionSummary from "@/components/CollectionSummary";
 import MountGrid from "@/components/MountGrid";
 import DailiesView from "@/components/DailiesView";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { collapseSections, expandSections } from "@/lib/collapseStore";
+import { sectionTitles } from "@/lib/groupMounts";
 
 export default function Home() {
   const [view, setView] = useState("collection"); // "collection" | "dailies"
@@ -49,8 +52,15 @@ export default function Home() {
   // Tank) - counting those in the denominator makes 100% permanently
   // unreachable for anyone who missed them. Any retired mounts the player
   // already has are still surfaced, just as a separate "+n" instead.
+  // Sections currently on screen - what Expand all / Collapse all act on.
+  const visibleSectionTitles = useMemo(() => sectionTitles(filteredMounts), [filteredMounts]);
+
+  const availableMounts = useMemo(
+    () => relevantMounts.filter((m) => m.sourceCategory !== "Retired"),
+    [relevantMounts]
+  );
   const { total, collected, usable, unobtainableOwned, retiredCount } = useMemo(() => {
-    const available = relevantMounts.filter((m) => m.sourceCategory !== "Retired");
+    const available = availableMounts;
     const unobtainable = relevantMounts.filter((m) => m.sourceCategory === "Retired");
     return {
       total: available.length,
@@ -62,27 +72,30 @@ export default function Home() {
         ownedIds && usableIds ? available.filter((m) => usableIds.has(m.id)).length : null,
       unobtainableOwned: ownedIds ? unobtainable.filter((m) => ownedIds.has(m.id)).length : 0,
     };
-  }, [relevantMounts, ownedIds, usableIds]);
+  }, [relevantMounts, availableMounts, ownedIds, usableIds]);
 
   return (
     <main>
       <h1>WoW Mount Collection Tracker</h1>
-      <div className="view-tabs" role="tablist">
-        {[
-          ["collection", "Collection"],
-          ["dailies", "Dailies"],
-        ].map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            aria-selected={view === value}
-            className={`view-tab${view === value ? " active" : ""}`}
-            onClick={() => setView(value)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="view-bar">
+        <div className="view-tabs" role="tablist">
+          {[
+            ["collection", "Collection"],
+            ["dailies", "Dailies"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={view === value}
+              className={`view-tab${view === value ? " active" : ""}`}
+              onClick={() => setView(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <ThemeSwitcher />
       </div>
       {view === "collection" ? (
         <CollectionSummary
@@ -102,8 +115,10 @@ export default function Home() {
             disabled={!ownedIds}
             showRetired={showRetired}
             onShowRetiredChange={setShowRetired}
+            onExpandAll={() => expandSections(visibleSectionTitles)}
+            onCollapseAll={() => collapseSections(visibleSectionTitles)}
           />
-          <MountGrid mounts={filteredMounts} ownedIds={ownedIds} />
+          <MountGrid mounts={filteredMounts} ownedIds={ownedIds} countMounts={availableMounts} />
         </>
       ) : (
         <DailiesView ownedIds={ownedIds} faction={faction} character={character} />

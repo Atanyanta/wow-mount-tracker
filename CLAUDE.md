@@ -184,12 +184,88 @@ no lockout) and weekly-quest chance rewards are all in the `excluded` list of
   Wed). Times are treated as **fixed UTC** - sources disagreed on DST; if a
   reset ever looks an hour off, fix `RESET_SCHEDULES` (verify in game with
   `/run print(C_DateAndTime.GetSecondsUntilDailyReset(), C_DateAndTime.GetSecondsUntilWeeklyReset())`).
-- **`components/DailiesView.js`** - UI. `SearchBar` now passes
+- **`components/DailiesView.js`** - UI. Each card has a **Done** button; a done
+  card moves out of its group into a "Completed this reset" section at the
+  bottom (with "Back in ..." countdown and an **Undo** button) and returns to its
+  group by itself when its period expires. "Hide completed" hides that section.
+  `SearchBar` now passes
   `character: { region, realm, name }` up with each scan result so the tab
   knows which region's reset to use and where to store completion.
 
 Midnight (12.x) entries are marked medium/low confidence: that content post-dates
 the research and its lockouts weren't independently verified.
+
+## Themes
+
+A header switcher (`components/ThemeSwitcher.js`) picks a theme; Dark is the
+default (server-rendered on `<html>`, doesn't follow the OS setting). A theme
+(`lib/themes.js`) is a bundle of one option on each of six axes in
+`lib/styleOptions.js` (palette, headings, dividers, cards, collected-mount
+indicator, progress), applied as `data-<axis>` attributes on `<html>` and
+styled in `app/themes.css`. State (active theme + per-axis overrides) lives in
+`lib/themeStore.js` (localStorage, `useSyncExternalStore`); `app/layout.js` has
+an inline head script that applies the saved theme before paint and must stay in
+step with the store's merge (theme picks, then overrides). Full guide - adding
+themes/options, current bundles, files - in `docs/themes.md`; screenshots in
+`docs/style-previews/`. All themes currently share type=engraved,
+dividers=banner, cards=plaque, owned=dim, progress=bars (XP-style bar, count
+inside) and differ only by palette; each palette's `--owned` matches its accent.
+Collection sections are collapsible in every theme (`lib/collapseStore.js`,
+`MountGrid`'s `Section`; collapsed sections aren't rendered, only their
+heading + bar).
+
+The bundles are **placeholders the user is still tuning**: don't delete options
+or the extra Azeroth Gold theme before they decide. Light is the warm parchment
+palette. `components/StylePicker.js` (the "Customize" panel) is design-time
+scaffolding, **hidden by default** - set `NEXT_PUBLIC_THEME_CUSTOMIZER=1` in
+`.env.local` and restart dev to show it; remove it once bundles are settled.
+The filter bar is built from `SegmentedControl` + `Toggle` (also used for the
+Dailies options) and holds the Expand all / Collapse all buttons. Inline
+scripts in a layout must go through `components/InlineScript.js`, or React
+reports a "script tag while rendering" error whenever hot reload re-renders the
+layout. Any server-rendered form input whose `disabled`/`checked` changes on the
+client (the filter radios, toggles) needs `autoComplete="off"` +
+`suppressHydrationWarning`: some browsers/extensions alter form controls before
+React hydrates, which otherwise shows as a "tree hydrated but some attributes
+didn't match" error (`SegmentedControl` also re-syncs `disabled` in a layout
+effect). `MountIcon`'s `owned` prop is three-state (true / false / undefined =
+no scan) - keep it that way or "dim missing" styles will grey out an unscanned
+catalog.
+
+## Realm list and type-ahead
+
+The realm field is a type-ahead (`components/RealmCombobox.js`, ARIA combobox)
+over `data/realms.json` - US/EU/KR/TW retail realms with Blizzard's own slugs,
+built once by `npm run build:realms` (`scripts/build-realms.mjs`, reads
+Blizzard's realm index and drops internal shard/instance/account realms) and
+committed; nothing is fetched at page load. Re-run it when Blizzard adds or
+renames a realm - it prints what changed, and refuses to write a truncated
+list. `lib/realms.js` (pure) does the matching: case/accent/punctuation/space
+insensitive (`kel thuzad`, `azjol nerub`), search ranking, and "did you mean".
+Realms are identified by **slug, not by a slug guessed from the name** (real
+slugs differ: Azjol-Nerub is `azjolnerub`). `SearchBar` validates the realm
+against the list before any request and sends the slug; `app/api/collections`
+does the same check server-side (400 "Unknown realm"). Cache/"done" keys use
+the slug; old saved searches (realm as typed) still restore. Editing the form
+clears an error message. If a region has no list, both sides fall back to free
+text rather than blocking searches.
+
+## QA
+
+`docs/qa-report.md` is the QA record (what was tested, run history, bugs found
+and fixed, what is still untested) and `docs/qa/` holds the runnable suites:
+`qa.mjs` (Node + Chrome, 91 checks), `ff.mjs` (Firefox over WebDriver BiDi, 48
+checks - Firefox is the user's browser), `realms-unit.mjs` and `leak.mjs`. Re-run them after
+UI/API changes and keep the report current. `app/api/collections/route.js`
+validates realm/character slugs (`SLUG_PATTERN`: letters of any script, digits,
+hyphens, max 64) before building the Blizzard URL - keep that when editing it.
+
+## Tooltip edge flip
+
+Tooltips are left-anchored to the icon (`globals.css`), so `lib/tooltipFlip.js`
+(a delegated `onMouseOver`/`onFocus` on `MountGrid` and `DailiesView`, not per
+icon) adds `.tip-right` to icons near the right edge of the window. New views
+that render `MountIcon`s need the same handler on their container.
 
 ## Secrets
 

@@ -1,0 +1,460 @@
+{
+  "results": [
+    {
+      "group": "data",
+      "name": "mount ids are unique and names present",
+      "ok": true
+    },
+    {
+      "group": "data",
+      "name": "every mount's icon file exists on disk",
+      "ok": true
+    },
+    {
+      "group": "data",
+      "name": "factions are alliance/horde/null and patches parse",
+      "ok": true
+    },
+    {
+      "group": "data",
+      "name": "farmables reference real mounts with matching names",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "valid character -> 200 with owned/usable/faction",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "missing params -> 400",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "unsupported region -> 400",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "unknown character -> 404 with message",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "realm/name normalisation (spaces, apostrophes, case)",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "hostile input is rejected with 400 (?, /, #, ../, 3000 chars)",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "legitimate international/spaced names still pass validation (reach Blizzard: 200 or 404, never 400)",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "wrong methods and unknown routes",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "unknown / typo'd / other-region realm is rejected with 400",
+      "ok": true
+    },
+    {
+      "group": "api",
+      "name": "realm given by NAME resolves to Blizzard's real slug (Azjol-Nerub -> azjolnerub, accents optional)",
+      "ok": true
+    },
+    {
+      "group": "realms",
+      "name": "data file: 4 regions, sane counts, unique valid slugs, sorted, names present",
+      "ok": true
+    },
+    {
+      "group": "realms",
+      "name": "data file: no internal Blizzard pseudo-realms leaked into the list",
+      "ok": true
+    },
+    {
+      "group": "realms",
+      "name": "data file: well-known real realms are present in every region",
+      "ok": true
+    },
+    {
+      "group": "realms",
+      "name": "data file: age (informational: warn if older than 365 days)",
+      "ok": true
+    },
+    {
+      "group": "realms",
+      "name": "lib/realms.js: exact match, loose spelling, search ranking, suggestions, speed (28 checks)",
+      "ok": true
+    },
+    {
+      "group": "logic",
+      "name": "resets: daily/weekly boundaries per region",
+      "ok": true
+    },
+    {
+      "group": "logic",
+      "name": "farmables: faction twins, opposing faction, ownership",
+      "ok": true
+    },
+    {
+      "group": "logic",
+      "name": "groupMounts: sectionTitles matches the sections groupMounts builds",
+      "ok": true
+    },
+    {
+      "group": "load",
+      "name": "title, heading, default theme, no customizer",
+      "ok": true
+    },
+    {
+      "group": "load",
+      "name": "unscanned summary + catalog renders every mount neutrally",
+      "ok": true
+    },
+    {
+      "group": "load",
+      "name": "Collected/Uncollected disabled before scan; server HTML matched",
+      "ok": true
+    },
+    {
+      "group": "load",
+      "name": "no theme flash: correct palette present at DOMContentLoaded",
+      "ok": true
+    },
+    {
+      "group": "search",
+      "name": "empty form -> validation message, no request",
+      "ok": true
+    },
+    {
+      "group": "search",
+      "name": "unknown character -> not-found message, results stay cleared",
+      "ok": true
+    },
+    {
+      "group": "search",
+      "name": "wrong region -> not found (EU)",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "ARIA combobox pattern; opens on focus with the full region list",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "typing filters the list, best match first",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "no match -> clear message; near-miss -> 'did you mean' with a selectable realm",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "keyboard: Down highlights (aria-activedescendant), Enter picks without submitting, next Enter submits",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "Enter with partial text and nothing highlighted accepts the top match (no submit)",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "Escape closes the list without clearing the text",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "clicking an option picks it (real mouse); the exact realm then shows the whole list with it marked",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "loose spelling snaps to the proper name on blur (Kel'Thuzad, Azjol-Nerub, Aggra (Português))",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "search ignores accents and matches inside names",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "Korean realms are found by their English slug and listed in their own script",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "changing region drops a realm that isn't in the new region, keeps one that is",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "invalid realm: no request, clear message with a suggestion, red field; editing clears the error",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "the request carries Blizzard's real slug, not the typed text (Azjol-Nerub -> realm=azjolnerub)",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "saved searches restore: legacy typed realm ('Area 52') and new slug form ('area-52')",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "dropdown at 1400px: inside the viewport and on top of the page content",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "dropdown at 390px: inside the viewport and on top of the page content",
+      "ok": true
+    },
+    {
+      "group": "realm",
+      "name": "option text is readable (WCAG 4.5:1) in every theme",
+      "ok": true
+    },
+    {
+      "group": "scan",
+      "name": "scan via Enter key: status, summary numbers, usable count",
+      "ok": true
+    },
+    {
+      "group": "scan",
+      "name": "grid: owned/unowned counts, opposing faction hidden, cross-faction owned kept",
+      "ok": true
+    },
+    {
+      "group": "scan",
+      "name": "cache written and restored after reload",
+      "ok": true
+    },
+    {
+      "group": "progress",
+      "name": "section bars: labels sum to the summary; bars/labels agree",
+      "ok": true
+    },
+    {
+      "group": "filters",
+      "name": "Collected shows only owned; Uncollected only unowned; All restores",
+      "ok": true
+    },
+    {
+      "group": "filters",
+      "name": "section counts ignore the filter (no 0/n while filtering)",
+      "ok": true
+    },
+    {
+      "group": "filters",
+      "name": "keyboard: arrow keys move the radio selection",
+      "ok": true
+    },
+    {
+      "group": "filters",
+      "name": "Show retired toggle hides exactly the retired mounts",
+      "ok": true
+    },
+    {
+      "group": "collapse",
+      "name": "section heading toggles; content unmounts; aria-expanded correct",
+      "ok": true
+    },
+    {
+      "group": "collapse",
+      "name": "keyboard: Enter and Space toggle a section",
+      "ok": true
+    },
+    {
+      "group": "collapse",
+      "name": "Collapse all / Expand all + persistence across reload",
+      "ok": true
+    },
+    {
+      "group": "collapse",
+      "name": "Collapse all only touches what's on screen (filtered view)",
+      "ok": true
+    },
+    {
+      "group": "icons",
+      "name": "links open Wowhead in a new tab safely",
+      "ok": true
+    },
+    {
+      "group": "icons",
+      "name": "hover tooltip: content, collected line, stays inside the viewport",
+      "ok": true
+    },
+    {
+      "group": "icons",
+      "name": "tooltip of the right-most icon on the page is not clipped by the viewport",
+      "ok": true
+    },
+    {
+      "group": "icons",
+      "name": "all images load after scrolling the whole page (no broken icons / 404s)",
+      "ok": true
+    },
+    {
+      "group": "themes",
+      "name": "six chips; each applies its palette, persists across reload, keeps shared look",
+      "ok": true
+    },
+    {
+      "group": "themes",
+      "name": "text contrast (WCAG AA 4.5:1 body, 3:1 headings) in every theme",
+      "ok": true
+    },
+    {
+      "group": "themes",
+      "name": "bad saved values fall back to Dark; hidden overrides are ignored",
+      "ok": true
+    },
+    {
+      "group": "dailies",
+      "name": "tab shows summary, reset countdowns, cards; missing mounts are NOT dimmed",
+      "ok": true
+    },
+    {
+      "group": "dailies",
+      "name": "cards never list owned mounts by default; 'Include collected' adds them",
+      "ok": true
+    },
+    {
+      "group": "dailies",
+      "name": "Done button moves card to Completed; Undo, hide-completed, persists, auto-expires at reset",
+      "ok": true
+    },
+    {
+      "group": "dailies",
+      "name": "switching tabs keeps Collection state; region reset label follows the character",
+      "ok": true
+    },
+    {
+      "group": "a11y",
+      "name": "roles, names and labels",
+      "ok": true
+    },
+    {
+      "group": "responsive",
+      "name": "320px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "ok": true
+    },
+    {
+      "group": "responsive",
+      "name": "390px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "ok": true
+    },
+    {
+      "group": "responsive",
+      "name": "768px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "ok": true
+    },
+    {
+      "group": "perf",
+      "name": "page weight and load timing (informational thresholds)",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "Blizzard/network failure '429': clear message, previous results kept, button recovers",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "Blizzard/network failure '500': clear message, previous results kept, button recovers",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "Blizzard/network failure '502': clear message, previous results kept, button recovers",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "Blizzard/network failure 'network': clear message, previous results kept, button recovers",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "Blizzard/network failure 'badjson': clear message, previous results kept, button recovers",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "after a failure, a normal rescan succeeds again",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "404 from a scanned state clears the previous character's results",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "rapid double-click on Scan sends exactly one request",
+      "ok": true
+    },
+    {
+      "group": "failures",
+      "name": "HTML in the name/realm fields is rendered as text, never as markup",
+      "ok": true
+    },
+    {
+      "group": "storage",
+      "name": "with localStorage blocked: loads, scans, themes, collapses - no errors",
+      "ok": true
+    },
+    {
+      "group": "keyboard",
+      "name": "Tab reaches every control in a sensible order, each with a visible focus indicator",
+      "ok": true
+    },
+    {
+      "group": "wide",
+      "name": "1920x1080: content centred at max-width, no overflow, tooltip flip still works",
+      "ok": true
+    },
+    {
+      "group": "wide",
+      "name": "2560x1080: content centred at max-width, no overflow, tooltip flip still works",
+      "ok": true
+    },
+    {
+      "group": "wide",
+      "name": "3440x1440: content centred at max-width, no overflow, tooltip flip still works",
+      "ok": true
+    },
+    {
+      "group": "misc",
+      "name": "no duplicate element ids; every label points at a control",
+      "ok": true
+    },
+    {
+      "group": "misc",
+      "name": "another tab changing the theme/collapse state (storage event) updates this tab",
+      "ok": true
+    },
+    {
+      "group": "misc",
+      "name": "rapid theme/collapse hammering leaves consistent state and no errors",
+      "ok": true
+    }
+  ],
+  "problems": []
+}

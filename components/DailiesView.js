@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import mounts from "@/data/mounts.json";
 import farmables from "@/data/farmables.json";
 import { resolveFarmables } from "@/lib/farmables";
+import { flipTooltip } from "@/lib/tooltipFlip";
 import { RESET_SCHEDULES, formatCountdown, getNextReset, getPeriodId } from "@/lib/resets";
 import MountIcon from "./MountIcon";
+import Toggle from "./Toggle";
 
 const DONE_KEY_PREFIX = "wow-mount-tracker:done:";
 const TICK_MS = 30 * 1000;
@@ -64,12 +66,12 @@ export default function DailiesView({ ownedIds, faction, character }) {
     setDone(readDone(key));
   }, [key]);
 
-  function toggleDone(activity, cadence, checked) {
+  function setActivityDone(activity, cadence, isNowDone) {
     if (!key) return;
     const next = { ...done };
     // getPeriodId reads the clock itself (not the 30s-stale `now` state) so a
     // click just after a reset is stamped with the new period.
-    if (checked) next[activity.id] = { cadence, period: getPeriodId(region, cadence) };
+    if (isNowDone) next[activity.id] = { cadence, period: getPeriodId(region, cadence) };
     else delete next[activity.id];
     // Drop entries from past periods while we're writing anyway.
     for (const [id, e] of Object.entries(next)) {
@@ -88,16 +90,19 @@ export default function DailiesView({ ownedIds, faction, character }) {
     [ownedIds, faction]
   );
 
-  const visibleGroups = groups
-    .map((group) => ({
-      ...group,
-      activities: group.activities.filter((a) => {
-        if (!includeCollected && a.remaining === 0) return false;
-        if (hideDone && isDone(done, a, group.cadence, region, now)) return false;
-        return true;
-      }),
-    }))
-    .filter((g) => g.activities.length > 0);
+  // Done activities move out of their group into one "Completed" section at the
+  // bottom; they move back by themselves once their reset period ends.
+  const visibleGroups = [];
+  const completed = [];
+  for (const group of groups) {
+    const activities = [];
+    for (const a of group.activities) {
+      if (!includeCollected && a.remaining === 0) continue;
+      if (isDone(done, a, group.cadence, region, now)) completed.push({ group, activity: a });
+      else activities.push(a);
+    }
+    if (activities.length > 0) visibleGroups.push({ ...group, activities });
+  }
 
   let missingMounts = 0;
   let missingActivities = 0;
@@ -116,7 +121,7 @@ export default function DailiesView({ ownedIds, faction, character }) {
   const weeklyDay = WEEKDAYS[schedule.weeklyDayUtc];
 
   return (
-    <div className="dailies">
+    <div className="dailies" onMouseOver={flipTooltip} onFocus={flipTooltip}>
       <p className="dailies-summary">
         {ownedIds
           ? `${missingMounts} uncollected mounts across ${missingActivities} daily/weekly kills - ${leftThisReset} left this reset`
@@ -130,19 +135,12 @@ export default function DailiesView({ ownedIds, faction, character }) {
         </span>
       </p>
       <div className="filter-bar">
-        <label>
-          <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} />
+        <Toggle checked={hideDone} onChange={setHideDone}>
           Hide completed
-        </label>
-        <label className={ownedIds ? "" : "disabled"}>
-          <input
-            type="checkbox"
-            checked={includeCollected}
-            disabled={!ownedIds}
-            onChange={(e) => setIncludeCollected(e.target.checked)}
-          />
+        </Toggle>
+        <Toggle checked={includeCollected} disabled={!ownedIds} onChange={setIncludeCollected}>
           Include collected mounts
-        </label>
+        </Toggle>
         {!key ? (
           <span className="filter-bar-hint">Scan a character to track completion (saved per character).</span>
         ) : null}
@@ -150,9 +148,11 @@ export default function DailiesView({ ownedIds, faction, character }) {
 
       {visibleGroups.length === 0 ? (
         <p className="dailies-empty">
-          {ownedIds && !includeCollected
-            ? "Nothing left to farm here - every daily/weekly kill mount is collected."
-            : "Nothing to show."}
+          {completed.length > 0
+            ? "All done for this reset."
+            : ownedIds && !includeCollected
+              ? "Nothing left to farm here - every daily/weekly kill mount is collected."
+              : "Nothing to show."}
         </p>
       ) : null}
 
@@ -160,54 +160,94 @@ export default function DailiesView({ ownedIds, faction, character }) {
         <section className="dailies-group" key={group.id}>
           <h2 className="expansion-heading">{group.title}</h2>
           <div className="farm-card-row">
-            {group.activities.map((activity) => {
-              const complete = isDone(done, activity, group.cadence, region, now);
-              const rows = includeCollected ? activity.rows : activity.rows.filter((r) => !r.owned);
-              return (
-                <article className={`farm-card${complete ? " done" : ""}`} key={activity.id}>
-                  <header className="farm-card-header">
-                    <h3 className="farm-card-title">{activity.name}</h3>
-                    <span className={`farm-cadence ${group.cadence}`}>{group.cadence}</span>
-                  </header>
-                  <p className="farm-card-meta">
-                    {activity.zone} - {activity.expansion}
-                    {activity.confidence === "low" ? (
-                      <span className="farm-unverified" title="Not yet verified in game - see docs/farmables-review.md">
-                        unverified
-                      </span>
-                    ) : null}
-                  </p>
-                  <p className="farm-card-difficulty">{activity.difficulty}</p>
-                  <ul className="farm-mounts">
-                    {rows.map(({ fm, mount, owned }) => (
-                      <li className="farm-mount" key={fm.id}>
-                        <MountIcon mount={mount} owned={owned} />
-                        <span className="farm-mount-text">
-                          <span className="farm-mount-name">{mount.name}</span>
-                          <span className="farm-mount-boss">
-                            {fm.boss}
-                            {fm.difficulty ? ` - ${fm.difficulty}` : ""}
-                          </span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  {activity.note ? <p className="farm-card-note">{activity.note}</p> : null}
-                  <label className={`farm-done${key ? "" : " disabled"}`}>
-                    <input
-                      type="checkbox"
-                      checked={complete}
-                      disabled={!key}
-                      onChange={(e) => toggleDone(activity, group.cadence, e.target.checked)}
-                    />
-                    {`Done this ${group.cadence === "daily" ? "day" : "week"}`}
-                  </label>
-                </article>
-              );
-            })}
+            {group.activities.map((activity) => (
+              <FarmCard
+                key={activity.id}
+                activity={activity}
+                cadence={group.cadence}
+                ownedIds={ownedIds}
+                includeCollected={includeCollected}
+              >
+                <button
+                  type="button"
+                  className="farm-done-button"
+                  disabled={!key}
+                  title={key ? undefined : "Scan a character to track completion"}
+                  onClick={() => setActivityDone(activity, group.cadence, true)}
+                >
+                  Done
+                </button>
+              </FarmCard>
+            ))}
           </div>
         </section>
       ))}
+
+      {completed.length > 0 && !hideDone ? (
+        <section className="dailies-group dailies-completed">
+          <h2 className="expansion-heading">Completed this reset ({completed.length})</h2>
+          <div className="farm-card-row">
+            {completed.map(({ group, activity }) => (
+              <FarmCard
+                key={activity.id}
+                activity={activity}
+                cadence={group.cadence}
+                ownedIds={ownedIds}
+                includeCollected={includeCollected}
+                done
+              >
+                <span className="farm-done-back">
+                  Back in {formatCountdown(getNextReset(region, group.cadence, now) - now)}
+                </span>
+                <button
+                  type="button"
+                  className="farm-done-button undo"
+                  onClick={() => setActivityDone(activity, group.cadence, false)}
+                >
+                  Undo
+                </button>
+              </FarmCard>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
+  );
+}
+
+function FarmCard({ activity, cadence, ownedIds, includeCollected, done = false, children }) {
+  const rows = includeCollected ? activity.rows : activity.rows.filter((r) => !r.owned);
+  return (
+    <article className={`farm-card${done ? " done" : ""}`}>
+      <header className="farm-card-header">
+        <h3 className="farm-card-title">{activity.name}</h3>
+        <span className={`farm-cadence ${cadence}`}>{cadence}</span>
+      </header>
+      <p className="farm-card-meta">
+        {activity.zone} - {activity.expansion}
+        {activity.confidence === "low" ? (
+          <span className="farm-unverified" title="Not yet verified in game - see docs/farmables-review.md">
+            unverified
+          </span>
+        ) : null}
+      </p>
+      <p className="farm-card-difficulty">{activity.difficulty}</p>
+      <ul className="farm-mounts">
+        {rows.map(({ fm, mount, owned }) => (
+          <li className="farm-mount" key={fm.id}>
+            <MountIcon mount={mount} owned={ownedIds ? owned : undefined} />
+            <span className="farm-mount-text">
+              <span className="farm-mount-name">{mount.name}</span>
+              <span className="farm-mount-boss">
+                {fm.boss}
+                {fm.difficulty ? ` - ${fm.difficulty}` : ""}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {activity.note ? <p className="farm-card-note">{activity.note}</p> : null}
+      <div className="farm-card-actions">{children}</div>
+    </article>
   );
 }

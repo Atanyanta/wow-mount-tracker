@@ -1,0 +1,242 @@
+[
+  {
+    "name": "title/heading render",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "default Dark theme applied",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "server HTML radios arrive disabled",
+    "ok": true,
+    "detail": "{\"palette\":\"dark\",\"radios\":[\"false/true\",\"true/false\",\"true/false\"]}"
+  },
+  {
+    "name": "no console errors/hydration warnings",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "scan completes; summary shows collected/total",
+    "ok": true,
+    "detail": "796 / 1460 mounts collected (+1 unobtainable) (55%) · 727 usable on th"
+  },
+  {
+    "name": "Collected/Uncollected enabled after scan",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #1: zero hydration errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #1: cached scan restored + filter radios enabled",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #1: no other console errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #2: zero hydration errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #2: cached scan restored + filter radios enabled",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #2: no other console errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #3: zero hydration errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #3: cached scan restored + filter radios enabled",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #3: no other console errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #4: zero hydration errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #4: cached scan restored + filter radios enabled",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "reload #4: no other console errors",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "catalog renders (scanned): owned + unowned icons",
+    "ok": true,
+    "detail": "1511 icons"
+  },
+  {
+    "name": "filter: Collected shows only owned",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "toggle: Show retired off reduces icons",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Collapse all removes all icons from DOM",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "collapsed state persists across reload (no hydration error)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "theme Light: palette attribute + background applied",
+    "ok": true,
+    "detail": "light rgb(239, 227, 198)"
+  },
+  {
+    "name": "theme Void: palette attribute + background applied",
+    "ok": true,
+    "detail": "void rgb(13, 9, 22)"
+  },
+  {
+    "name": "theme Alliance: palette attribute + background applied",
+    "ok": true,
+    "detail": "alliance rgb(10, 16, 29)"
+  },
+  {
+    "name": "theme Horde: palette attribute + background applied",
+    "ok": true,
+    "detail": "horde rgb(17, 11, 10)"
+  },
+  {
+    "name": "theme Azeroth Gold: palette attribute + background applied",
+    "ok": true,
+    "detail": "gold rgb(21, 17, 11)"
+  },
+  {
+    "name": "theme Dark: palette attribute + background applied",
+    "ok": true,
+    "detail": "dark rgb(10, 10, 10)"
+  },
+  {
+    "name": "theme persists across reload and is set before hydration",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "CSS features used by the theme are supported",
+    "ok": true,
+    "detail": "{\"colorMix\":true,\"has\":true,\"inset\":true,\"borderImage\":true}"
+  },
+  {
+    "name": "hover tooltip appears, on-screen, says Collected (real pointer move)",
+    "ok": true,
+    "detail": "{\"d\":\"flex\",\"l\":33,\"r\":273,\"w\":1400,\"txt\":true}"
+  },
+  {
+    "name": "Dailies renders cards + summary",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Done decrements 'left this reset' and moves the card to Completed",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "done state persists across a Firefox reload",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Undo returns the card",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "realm text restored after a Firefox reload, no hydration error",
+    "ok": true,
+    "detail": "\"Tichondrius\""
+  },
+  {
+    "name": "clicking the field opens the whole US realm list",
+    "ok": true,
+    "detail": "246 options, expected 246"
+  },
+  {
+    "name": "typing filters; Tichondrius first",
+    "ok": true,
+    "detail": "[\"Tichondrius\"]"
+  },
+  {
+    "name": "ArrowDown highlights via aria-activedescendant",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Enter picks the realm and closes the list (no submit)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "clicking the still-focused field reopens the list",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Escape closes without clearing",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "typo'd realm: clear message with a suggestion, field marked invalid",
+    "ok": true,
+    "detail": "\"Tichondrus\" isn't a US realm - pick one from the list. Did you mean Tichondrius?"
+  },
+  {
+    "name": "editing the realm clears the error",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "switching to KR drops a US-only realm",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Korean realm found by its English slug (azsh -> 아즈샤라)",
+    "ok": true,
+    "detail": "[\"아즈샤라\"]"
+  },
+  {
+    "name": "no console errors/warnings on the last page state",
+    "ok": true,
+    "detail": ""
+  }
+]

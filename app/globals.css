@@ -149,11 +149,19 @@ main {
   opacity: 0.65;
 }
 
+.view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+}
+
 .view-tabs {
   display: flex;
   gap: 0.25rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 .view-tab {
@@ -217,7 +225,9 @@ main {
   border-radius: 8px;
 }
 
-.farm-card.done {
+/* Dim the content of completed cards but not their actions, so Undo stays
+   readable (opacity on the card itself would fade the button too). */
+.farm-card.done > :not(.farm-card-actions) {
   opacity: 0.5;
 }
 
@@ -307,18 +317,19 @@ main {
   opacity: 0.6;
 }
 
-.farm-done {
+.farm-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
-  cursor: pointer;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
 }
 
-.farm-done.disabled {
-  opacity: 0.5;
-  cursor: default;
+.farm-done-back {
+  margin-right: auto;
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 
 .expansion-section {
@@ -439,6 +450,12 @@ main {
 .mount-icon-link:hover .mount-tooltip,
 .mount-icon-link:focus-visible .mount-tooltip {
   display: flex;
+}
+
+/* Set by lib/tooltipFlip.js for icons near the right edge of the window. */
+.mount-icon-link.tip-right .mount-tooltip {
+  left: auto;
+  right: 0;
 }
 
 .mount-tooltip-name {

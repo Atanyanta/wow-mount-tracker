@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { findRealm, getRealms, suggestRealms } from "@/lib/realms";
+import RealmCombobox from "./RealmCombobox";
 
 const LAST_SEARCH_KEY = "wow-mount-tracker:last-search";
 const REGIONS = ["us", "eu", "kr", "tw"];
 
+// `realm` in a query is the realm's slug (Blizzard's own, from data/realms.json),
+// lower-case - so cache and "done" keys are the same however the realm was typed.
 function cacheKey({ region, realm, name }) {
   return `wow-mount-tracker:owned:${region}:${realm.trim().toLowerCase()}:${name.trim().toLowerCase()}`;
 }
@@ -45,14 +49,22 @@ export default function SearchBar({ onScanResult }) {
       const raw = localStorage.getItem(LAST_SEARCH_KEY);
       if (!raw) return;
       const last = JSON.parse(raw);
+      const lastRegion = last.region || "us";
+      // Older versions saved the realm as typed ("Area 52"); newer ones save its
+      // slug. Either resolves to the same realm, shown by its proper name.
+      const lastRealm = findRealm(lastRegion, last.realm || "");
+      const realmName = lastRealm?.name ?? (last.realm || "");
+      const realmSlug = lastRealm?.slug ?? (last.realm || "");
       // One-time hydration from localStorage (an external system, per React's
       // own guidance on effects) - not state that could be derived at render
       // time, since it doesn't exist during server rendering.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRegion(last.region || "us");
-      setRealm(last.realm || "");
+      setRegion(lastRegion);
+      setRealm(realmName);
       setName(last.name || "");
-      const cached = readCache(last);
+      const cached =
+        readCache({ region: lastRegion, realm: realmSlug, name: last.name || "" }) ??
+        readCache({ region: lastRegion, realm: last.realm || "", name: last.name || "" });
       if (cached) {
         onScanResult({
           ownedIds: new Set(cached.ownedIds),
@@ -61,12 +73,12 @@ export default function SearchBar({ onScanResult }) {
           // spending a Blizzard call automatically.
           usableIds: cached.usableIds ? new Set(cached.usableIds) : null,
           faction: cached.faction ?? null,
-          character: { region: last.region || "us", realm: last.realm || "", name: last.name || "" },
+          character: { region: lastRegion, realm: realmSlug, name: last.name || "" },
         });
         setLastFetchedAt(cached.fetchedAt);
         setStatus({
           type: "info",
-          text: `Showing cached collection for ${last.name} (${last.realm}) from ${new Date(cached.fetchedAt).toLocaleString()}`,
+          text: `Showing cached collection for ${last.name} (${realmName}) from ${new Date(cached.fetchedAt).toLocaleString()}`,
         });
       }
     } catch {
@@ -75,13 +87,39 @@ export default function SearchBar({ onScanResult }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // An error message is about the text that was in the form when it appeared, so
+  // it goes away as soon as the user edits the form (info messages stay).
+  const clearError = () => setStatus((s) => (s?.type === "error" ? null : s));
+
+  // A realm exists in one region, so switching region drops a realm that isn't
+  // in the new region's list instead of leaving a mismatched pair in the form.
+  function changeRegion(next) {
+    clearError();
+    setRegion(next);
+    if (realm.trim() && getRealms(next).length > 0 && !findRealm(next, realm)) setRealm("");
+  }
+
   async function runScan(e) {
     e?.preventDefault();
     if (!realm.trim() || !name.trim()) {
       setStatus({ type: "error", text: "Enter a character name and realm." });
       return;
     }
-    const query = { region, realm, name };
+    // Only real realms go to the API. (If a region has no list at all, fall back
+    // to free text rather than blocking the search.)
+    const realmMatch = findRealm(region, realm);
+    if (!realmMatch && getRealms(region).length > 0) {
+      const tips = suggestRealms(region, realm);
+      setStatus({
+        type: "error",
+        text:
+          `"${realm.trim()}" isn't a ${region.toUpperCase()} realm - pick one from the list.` +
+          (tips.length ? ` Did you mean ${tips.map((t) => t.name).join(", ")}?` : ""),
+      });
+      return;
+    }
+    const query = { region, realm: realmMatch?.slug ?? realm.trim(), name: name.trim() };
+    const realmLabel = realmMatch?.name ?? realm.trim();
     setLoading(true);
     setStatus(null);
     try {
@@ -112,7 +150,7 @@ export default function SearchBar({ onScanResult }) {
       setLastFetchedAt(now);
       setStatus({
         type: "info",
-        text: `Loaded ${data.ownedIds.length} owned mounts for ${name.trim()} (${realm.trim()}) just now.`,
+        text: `Loaded ${data.ownedIds.length} owned mounts for ${query.name} (${realmLabel}) just now.`,
       });
     } catch {
       setStatus({ type: "error", text: "Network error, try again." });
@@ -123,22 +161,29 @@ export default function SearchBar({ onScanResult }) {
 
   return (
     <form className="search-bar" onSubmit={runScan}>
-      <select value={region} onChange={(e) => setRegion(e.target.value)}>
+      <select value={region} onChange={(e) => changeRegion(e.target.value)} aria-label="Region">
         {REGIONS.map((r) => (
           <option key={r} value={r}>
             {r.toUpperCase()}
           </option>
         ))}
       </select>
-      <input
-        placeholder="Realm"
+      <RealmCombobox
+        region={region}
         value={realm}
-        onChange={(e) => setRealm(e.target.value)}
+        onChange={(text) => {
+          clearError();
+          setRealm(text);
+        }}
       />
       <input
         placeholder="Character name"
+        aria-label="Character name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          clearError();
+          setName(e.target.value);
+        }}
       />
       <button type="submit" disabled={loading}>
         {loading ? "Scanning..." : lastFetchedAt ? "Rescan" : "Scan"}

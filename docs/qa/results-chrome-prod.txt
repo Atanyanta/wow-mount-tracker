@@ -1,0 +1,143 @@
+﻿   realm list generated 2026-09-21 (0 days ago)
+   perf: DOMContentLoaded 106 ms, load 141 ms, 15031 elements (all sections expanded)
+   tab order: Collection > Dailies > Dark > Light > Void > Alliance > Horde > Azeroth Gold > Region > Realm > Character name > Rescan > all > on > Expand all > Collapse all > Midnight79 / 130 > Apophic Soul Crusher ( > Auriferous Venomfang ( > Breath of Blight (coll > Breath of Ruin > Crimson Venomfang > Emerald Skyfang
+
+================ QA RESULTS ================
+
+[data] 4/4 passed
+  PASS  mount ids are unique and names present
+  PASS  every mount's icon file exists on disk
+  PASS  factions are alliance/horde/null and patches parse
+  PASS  farmables reference real mounts with matching names
+
+[api] 10/10 passed
+  PASS  valid character -> 200 with owned/usable/faction
+  PASS  missing params -> 400
+  PASS  unsupported region -> 400
+  PASS  unknown character -> 404 with message
+  PASS  realm/name normalisation (spaces, apostrophes, case)
+  PASS  hostile input is rejected with 400 (?, /, #, ../, 3000 chars)
+  PASS  legitimate international/spaced names still pass validation (reach Blizzard: 200 or 404, never 400)
+  PASS  wrong methods and unknown routes
+  PASS  unknown / typo'd / other-region realm is rejected with 400
+  PASS  realm given by NAME resolves to Blizzard's real slug (Azjol-Nerub -> azjolnerub, accents optional)
+
+[realms] 5/5 passed
+  PASS  data file: 4 regions, sane counts, unique valid slugs, sorted, names present
+  PASS  data file: no internal Blizzard pseudo-realms leaked into the list
+  PASS  data file: well-known real realms are present in every region
+  PASS  data file: age (informational: warn if older than 365 days)
+  PASS  lib/realms.js: exact match, loose spelling, search ranking, suggestions, speed (28 checks)
+
+[logic] 3/3 passed
+  PASS  resets: daily/weekly boundaries per region
+  PASS  farmables: faction twins, opposing faction, ownership
+  PASS  groupMounts: sectionTitles matches the sections groupMounts builds
+
+[load] 4/4 passed
+  PASS  title, heading, default theme, no customizer
+  PASS  unscanned summary + catalog renders every mount neutrally
+  PASS  Collected/Uncollected disabled before scan; server HTML matched
+  PASS  no theme flash: correct palette present at DOMContentLoaded
+
+[search] 3/3 passed
+  PASS  empty form -> validation message, no request
+  PASS  unknown character -> not-found message, results stay cleared
+  PASS  wrong region -> not found (EU)
+
+[realm] 17/17 passed
+  PASS  ARIA combobox pattern; opens on focus with the full region list
+  PASS  typing filters the list, best match first
+  PASS  no match -> clear message; near-miss -> 'did you mean' with a selectable realm
+  PASS  keyboard: Down highlights (aria-activedescendant), Enter picks without submitting, next Enter submits
+  PASS  Enter with partial text and nothing highlighted accepts the top match (no submit)
+  PASS  Escape closes the list without clearing the text
+  PASS  clicking an option picks it (real mouse); the exact realm then shows the whole list with it marked
+  PASS  loose spelling snaps to the proper name on blur (Kel'Thuzad, Azjol-Nerub, Aggra (Português))
+  PASS  search ignores accents and matches inside names
+  PASS  Korean realms are found by their English slug and listed in their own script
+  PASS  changing region drops a realm that isn't in the new region, keeps one that is
+  PASS  invalid realm: no request, clear message with a suggestion, red field; editing clears the error
+  PASS  the request carries Blizzard's real slug, not the typed text (Azjol-Nerub -> realm=azjolnerub)
+  PASS  saved searches restore: legacy typed realm ('Area 52') and new slug form ('area-52')
+  PASS  dropdown at 1400px: inside the viewport and on top of the page content
+  PASS  dropdown at 390px: inside the viewport and on top of the page content
+  PASS  option text is readable (WCAG 4.5:1) in every theme
+
+[scan] 3/3 passed
+  PASS  scan via Enter key: status, summary numbers, usable count
+  PASS  grid: owned/unowned counts, opposing faction hidden, cross-faction owned kept
+  PASS  cache written and restored after reload
+
+[progress] 1/1 passed
+  PASS  section bars: labels sum to the summary; bars/labels agree
+
+[filters] 4/4 passed
+  PASS  Collected shows only owned; Uncollected only unowned; All restores
+  PASS  section counts ignore the filter (no 0/n while filtering)
+  PASS  keyboard: arrow keys move the radio selection
+  PASS  Show retired toggle hides exactly the retired mounts
+
+[collapse] 4/4 passed
+  PASS  section heading toggles; content unmounts; aria-expanded correct
+  PASS  keyboard: Enter and Space toggle a section
+  PASS  Collapse all / Expand all + persistence across reload
+  PASS  Collapse all only touches what's on screen (filtered view)
+
+[icons] 4/4 passed
+  PASS  links open Wowhead in a new tab safely
+  PASS  hover tooltip: content, collected line, stays inside the viewport
+  PASS  tooltip of the right-most icon on the page is not clipped by the viewport
+  PASS  all images load after scrolling the whole page (no broken icons / 404s)
+
+[themes] 3/3 passed
+  PASS  six chips; each applies its palette, persists across reload, keeps shared look
+  PASS  text contrast (WCAG AA 4.5:1 body, 3:1 headings) in every theme
+  PASS  bad saved values fall back to Dark; hidden overrides are ignored
+
+[dailies] 4/4 passed
+  PASS  tab shows summary, reset countdowns, cards; missing mounts are NOT dimmed
+  PASS  cards never list owned mounts by default; 'Include collected' adds them
+  PASS  Done checkbox: persists per character, hide-completed, auto-expires at reset
+  PASS  switching tabs keeps Collection state; region reset label follows the character
+
+[a11y] 1/1 passed
+  PASS  roles, names and labels
+
+[responsive] 3/3 passed
+  PASS  320px wide: nothing pushes past the viewport (Collection + Dailies)
+  PASS  390px wide: nothing pushes past the viewport (Collection + Dailies)
+  PASS  768px wide: nothing pushes past the viewport (Collection + Dailies)
+
+[perf] 1/1 passed
+  PASS  page weight and load timing (informational thresholds)
+
+[failures] 9/9 passed
+  PASS  Blizzard/network failure '429': clear message, previous results kept, button recovers
+  PASS  Blizzard/network failure '500': clear message, previous results kept, button recovers
+  PASS  Blizzard/network failure '502': clear message, previous results kept, button recovers
+  PASS  Blizzard/network failure 'network': clear message, previous results kept, button recovers
+  PASS  Blizzard/network failure 'badjson': clear message, previous results kept, button recovers
+  PASS  after a failure, a normal rescan succeeds again
+  PASS  404 from a scanned state clears the previous character's results
+  PASS  rapid double-click on Scan sends exactly one request
+  PASS  HTML in the name/realm fields is rendered as text, never as markup
+
+[storage] 1/1 passed
+  PASS  with localStorage blocked: loads, scans, themes, collapses - no errors
+
+[keyboard] 1/1 passed
+  PASS  Tab reaches every control in a sensible order, each with a visible focus indicator
+
+[wide] 3/3 passed
+  PASS  1920x1080: content centred at max-width, no overflow, tooltip flip still works
+  PASS  2560x1080: content centred at max-width, no overflow, tooltip flip still works
+  PASS  3440x1440: content centred at max-width, no overflow, tooltip flip still works
+
+[misc] 3/3 passed
+  PASS  no duplicate element ids; every label points at a control
+  PASS  another tab changing the theme/collapse state (storage event) updates this tab
+  PASS  rapid theme/collapse hammering leaves consistent state and no errors
+
+TOTAL: 91 passed, 0 failed of 91
+unexpected console/network problems: 0

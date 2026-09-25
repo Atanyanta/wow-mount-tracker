@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "build:mounts": "node --env-file=.env.local scripts/build-mounts.mjs",
+    "build:realms": "node --env-file=.env.local scripts/build-realms.mjs",
     "check:farmables": "node scripts/check-farmables.mjs"
   },
   "dependencies": {
