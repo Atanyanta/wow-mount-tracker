@@ -35,7 +35,7 @@
     "detail": ""
   },
   {
-    "name": "reload #1: cached scan restored + filter radios enabled",
+    "name": "reload #1: cached scan restored silently + filter radios enabled",
     "ok": true,
     "detail": ""
   },
@@ -50,7 +50,7 @@
     "detail": ""
   },
   {
-    "name": "reload #2: cached scan restored + filter radios enabled",
+    "name": "reload #2: cached scan restored silently + filter radios enabled",
     "ok": true,
     "detail": ""
   },
@@ -65,7 +65,7 @@
     "detail": ""
   },
   {
-    "name": "reload #3: cached scan restored + filter radios enabled",
+    "name": "reload #3: cached scan restored silently + filter radios enabled",
     "ok": true,
     "detail": ""
   },
@@ -80,7 +80,7 @@
     "detail": ""
   },
   {
-    "name": "reload #4: cached scan restored + filter radios enabled",
+    "name": "reload #4: cached scan restored silently + filter radios enabled",
     "ok": true,
     "detail": ""
   },
@@ -160,22 +160,37 @@
     "detail": "{\"d\":\"flex\",\"l\":33,\"r\":273,\"w\":1400,\"txt\":true}"
   },
   {
-    "name": "Dailies renders cards + summary",
+    "name": "Quest Log renders list + details + summary",
     "ok": true,
     "detail": ""
   },
   {
-    "name": "Done decrements 'left this reset' and moves the card to Completed",
+    "name": "clicking a quest shows its details",
     "ok": true,
     "detail": ""
   },
   {
-    "name": "done state persists across a Firefox reload",
+    "name": "category collapses",
     "ok": true,
     "detail": ""
   },
   {
-    "name": "Undo returns the card",
+    "name": "Collapse all / Expand all don't shift the page sideways",
+    "ok": true,
+    "detail": "595.5 / 595.5 / 595.5"
+  },
+  {
+    "name": "Done decrements 'left this reset' and moves the quest to Completed",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "done state persists across a Firefox reload (no hydration error)",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "Undo returns the quest",
     "ok": true,
     "detail": ""
   },

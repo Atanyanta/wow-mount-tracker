@@ -1,6 +1,6 @@
 // Validates data/farmables.json against data/mounts.json and regenerates
 // docs/farmables-review.md - a grouped, human-reviewable table of every
-// mount on the Dailies tab (with the raw source text from mounts.json next to
+// mount on the Quest Log tab (with the raw source text from mounts.json next to
 // each row so it can be eyeballed against the curated classification).
 //
 // Usage: npm run check:farmables   (exits 1 if any id/name problem is found)

@@ -232,7 +232,7 @@
     },
     {
       "group": "scan",
-      "name": "scan via Enter key: status, summary numbers, usable count",
+      "name": "scan via Enter key (lower-case input): status, name capitalised, summary numbers, usable count",
       "ok": true
     },
     {
@@ -326,22 +326,27 @@
       "ok": true
     },
     {
-      "group": "dailies",
-      "name": "tab shows summary, reset countdowns, cards; missing mounts are NOT dimmed",
+      "group": "questlog",
+      "name": "tab shows summary, resets, quest list + details for the first quest; rewards are NOT dimmed",
       "ok": true
     },
     {
-      "group": "dailies",
-      "name": "cards never list owned mounts by default; 'Include collected' adds them",
+      "group": "questlog",
+      "name": "clicking a quest selects it; categories collapse/expand (toggle + Expand/Collapse all) and persist",
       "ok": true
     },
     {
-      "group": "dailies",
-      "name": "Done button moves card to Completed; Undo, hide-completed, persists, auto-expires at reset",
+      "group": "questlog",
+      "name": "owned mounts hidden by default; 'Include collected' adds collected quests and rewards",
       "ok": true
     },
     {
-      "group": "dailies",
+      "group": "questlog",
+      "name": "Done moves the quest to Completed; Undo, Hide completed, persists, auto-expires at reset",
+      "ok": true
+    },
+    {
+      "group": "questlog",
       "name": "switching tabs keeps Collection state; region reset label follows the character",
       "ok": true
     },
@@ -352,17 +357,17 @@
     },
     {
       "group": "responsive",
-      "name": "320px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "name": "320px wide: nothing pushes past the viewport (Collection + Quest Log)",
       "ok": true
     },
     {
       "group": "responsive",
-      "name": "390px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "name": "390px wide: nothing pushes past the viewport (Collection + Quest Log)",
       "ok": true
     },
     {
       "group": "responsive",
-      "name": "768px wide: nothing pushes past the viewport (Collection + Dailies)",
+      "name": "768px wide: nothing pushes past the viewport (Collection + Quest Log)",
       "ok": true
     },
     {

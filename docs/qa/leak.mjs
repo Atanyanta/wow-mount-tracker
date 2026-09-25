@@ -82,13 +82,16 @@ const phases = {
     for (let r = 0; r < 10; r++) for (const f of ["Collected", "Uncollected", "All"]) { await click(`[...document.querySelectorAll('.segment')].find(s => s.textContent === '${f}')`); await sleep(150); }
     await click(btn(".toggle", "Show retired")); await sleep(150); await click(btn(".toggle", "Show retired"));
   },
-  "Collection <-> Dailies tab (x12) + Dailies toggles": async () => {
+  "Collection <-> Quest Log tab (x12) + quest select/collapse/done/toggles": async () => {
     for (let r = 0; r < 12; r++) {
-      await click(btn(".view-tab", "Dailies")); await sleep(200);
+      await click(btn(".view-tab", "Quest Log")); await sleep(200);
+      await click(`document.querySelectorAll('.quest-entry')[${r % 5}]`); await sleep(80);
+      await click(`document.querySelector('.quest-category-toggle')`); await sleep(80);
+      await click(`document.querySelector('.quest-category-toggle')`); await sleep(80);
+      await click(`document.querySelector('.quest-button:not(.undo)')`); await sleep(100);
+      await click(`document.querySelector('.quest-button.undo')`); await sleep(100);
       await click(btn(".toggle", "Include collected")); await sleep(100);
       await click(btn(".toggle", "Hide completed")); await sleep(100);
-      await click(`document.querySelector('.farm-done-button:not(.undo)')`); await sleep(100);
-      await click(`document.querySelector('.farm-done-button.undo')`); await sleep(100);
       await click(btn(".toggle", "Include collected")); await click(btn(".toggle", "Hide completed"));
       await click(btn(".view-tab", "Collection")); await sleep(300);
     }

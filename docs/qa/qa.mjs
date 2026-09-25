@@ -409,12 +409,14 @@ await t("realm", "the request carries Blizzard's real slug, not the typed text (
 });
 await t("realm", "saved searches restore: legacy typed realm ('Area 52') and new slug form ('area-52')", async () => {
   const cache = JSON.stringify({ ownedIds: [6, 7], usableIds: [6], faction: "alliance", fetchedAt: Date.now() });
-  for (const [savedRealm, cacheRealmKey] of [["Area 52", "area 52"], ["area-52", "area-52"]]) {
-    await ev(`localStorage.clear(); localStorage.setItem('wow-mount-tracker:last-search', JSON.stringify({region:'us',realm:${JSON.stringify(savedRealm)},name:'Legacycheck'})); localStorage.setItem('wow-mount-tracker:owned:us:${cacheRealmKey}:legacycheck', ${JSON.stringify(cache)})`);
+  // The second case also saves the name lower-case, as older versions did when it was typed that way.
+  for (const [savedRealm, cacheRealmKey, savedName] of [["Area 52", "area 52", "Legacycheck"], ["area-52", "area-52", "legacycheck"]]) {
+    await ev(`localStorage.clear(); localStorage.setItem('wow-mount-tracker:last-search', JSON.stringify({region:'us',realm:${JSON.stringify(savedRealm)},name:${JSON.stringify(savedName)}})); localStorage.setItem('wow-mount-tracker:owned:us:${cacheRealmKey}:legacycheck', ${JSON.stringify(cache)})`);
     await load();
-    await wait(`document.querySelector('.search-status')?.textContent.includes('Showing cached collection')`, 6000, "cached restore");
+    await wait(`document.querySelector('.mount-icon-link.owned')`, 6000, "cached restore");
     eq(await ev(`document.querySelector('.realm-combobox input').value`), "Area 52", `realm shown by proper name (saved as '${savedRealm}')`);
-    ok((await status()).includes("Legacycheck (Area 52)"), "status: " + (await status()));
+    eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), "Legacycheck", `name capitalised (saved as '${savedName}')`);
+    eq(await status(), null, "no status message for a silent restore");
   }
   await ev(`localStorage.clear()`); await load();
 });
@@ -442,12 +444,14 @@ await t("realm", "option text is readable (WCAG 4.5:1) in every theme", async ()
 await ev(`localStorage.clear()`); await load();
 
 // ---------------------------------------------------------------- C. real scan via Enter key
-await t("scan", "scan via Enter key: status, summary numbers, usable count", async () => {
-  await typeInto('.search-bar input[placeholder="Realm"]', CHAR.realm);
-  await typeInto('.search-bar input[placeholder="Character name"]', CHAR.name);
+await t("scan", "scan via Enter key (lower-case input): status, name capitalised, summary numbers, usable count", async () => {
+  await typeInto('.search-bar input[placeholder="Realm"]', CHAR.realm.toLowerCase());
+  await typeInto('.search-bar input[placeholder="Character name"]', CHAR.name.toLowerCase());
   await press("Enter");
   await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "scan complete");
-  ok((await status()).includes(`Loaded ${api.ownedIds.length} owned mounts`), "status count: " + (await status()));
+  ok((await status()).includes(`Loaded ${api.ownedIds.length} owned mounts for ${CHAR.name} (${CHAR.realm})`), "status: " + (await status()));
+  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), CHAR.name, "name shown as the game spells it");
+  eq(await ev(`document.querySelector('.search-bar input[placeholder="Realm"]').value`), CHAR.realm, "realm shown by its proper name");
   const s = await text(".collection-summary");
   ok(s.includes(`${expected.collected} / ${expected.total} mounts collected`), `collected/total: ${s}`);
   ok(s.includes(`${expected.usable} usable on this character`), `usable: ${s}`);
@@ -468,9 +472,12 @@ await t("scan", "cache written and restored after reload", async () => {
   ok(!!(await LS(scanKey)), "scan cached");
   ok(JSON.parse(await LS("wow-mount-tracker:last-search")).name === CHAR.name, "last search saved");
   await load();
-  await wait(`document.querySelector('.search-status')?.textContent.includes('Showing cached collection')`, 8000, "cached message");
+  await wait(`document.querySelector('.mount-icon-link.owned')`, 8000, "cached restore");
   eq(await count(".mount-icon-link.owned"), expected.renderedOwned, "owned after reload");
   eq(await ev(`document.querySelector('.search-bar input[placeholder="Realm"]').value`), CHAR.realm);
+  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), CHAR.name);
+  eq(await status(), null, "restored silently (no cached-collection message)");
+  eq(await text(".search-bar button[type=submit]"), "Rescan");
 });
 
 // ---------------------------------------------------------------- D. section progress
@@ -618,62 +625,116 @@ await t("themes", "bad saved values fall back to Dark; hidden overrides are igno
   await ev(`localStorage.setItem('wow-mount-tracker:theme', JSON.stringify({theme:'dark',overrides:{}}))`); await load();
 });
 
-// ---------------------------------------------------------------- I. Dailies
+// ---------------------------------------------------------------- I. Quest Log
 const doneKey = "wow-mount-tracker:done:us:tichondrius:kurowastaken";
-await t("dailies", "tab shows summary, reset countdowns, cards; missing mounts are NOT dimmed", async () => {
-  await mclick(byText(".view-tab", "Dailies"));
-  await wait(`document.querySelector('.dailies')`, 5000);
-  ok(/uncollected mounts across \d+ daily\/weekly kills - \d+ left this reset/.test(await text(".dailies-summary")), await text(".dailies-summary"));
-  ok(/US reset: daily in .*weekly in/.test(await text(".dailies-resets")), await text(".dailies-resets"));
-  ok((await count(".farm-card")) > 5, "cards");
-  eq(await ev(`${$$(".farm-mount .mount-icon-link.unowned .mount-icon-clip")}.filter(e=>getComputedStyle(e).filter!=='none').length`), 0, "missing mounts full colour on Dailies");
-  eq(await ev(`document.querySelector('.view-tab.active').textContent`), "Dailies");
+const questCollapseKey = "wow-mount-tracker:quest-log-collapsed";
+const leftThisReset = async () => parseInt((await text(".quest-log-summary")).match(/(\d+) left this reset/)[1]);
+const entryName = (e) => `${e}.querySelector('.quest-entry-name').textContent`;
+const selectedName = () => ev(entryName(`document.querySelector('.quest-entry[aria-current="true"]')`));
+const detailTitle = () => text(".quest-title");
+const reloadToQuests = async () => {
+  await ev(`location.reload()`); await wait(`document.readyState==='complete' && document.querySelector('.view-tab')`, 20000); await sleep(1000);
+  await mclick(byText(".view-tab", "Quest Log")); await wait(`document.querySelector('.quest-log')`, 5000);
+};
+await t("questlog", "tab shows summary, resets, quest list + details for the first quest; rewards are NOT dimmed", async () => {
+  await ev(`localStorage.removeItem(${JSON.stringify(questCollapseKey)})`);
+  await mclick(byText(".view-tab", "Quest Log"));
+  await wait(`document.querySelector('.quest-log')`, 5000);
+  eq(await ev(`document.querySelector('.view-tab.active').textContent`), "Quest Log");
+  ok(/uncollected mounts across \d+ daily\/weekly kills - \d+ left this reset/.test(await text(".quest-log-summary")), await text(".quest-log-summary"));
+  ok(/US reset: daily in .*weekly in/.test(await text(".quest-log-resets")), await text(".quest-log-resets"));
+  ok((await count(".quest-entry")) > 5, "quest entries");
+  eq(await count('.quest-entry[aria-current="true"]'), 1, "exactly one selected");
+  eq(await selectedName(), await ev(entryName(`document.querySelector('.quest-entry')`)), "first quest selected by default");
+  eq(await detailTitle(), await selectedName(), "details show the selected quest");
+  ok((await count(".quest-objectives li")) > 0 && (await count(".quest-reward")) > 0, "objectives + rewards");
+  ok(/^(Resets in) \S/.test(await text(".quest-reset")), "reset countdown in the footer");
+  eq(await count(".quest-button:not(.undo)"), 1, "Done button");
+  eq(await ev(`${$$(".quest-reward .mount-icon-link.unowned .mount-icon-clip")}.filter(e=>getComputedStyle(e).filter!=='none').length`), 0, "reward icons full colour");
 });
-await t("dailies", "cards never list owned mounts by default; 'Include collected' adds them", async () => {
-  eq(await count(".farm-mount .mount-icon-link.owned"), 0, "owned hidden by default");
-  const before = await count(".farm-mount");
+await t("questlog", "clicking a quest selects it; categories collapse/expand (toggle + Expand/Collapse all) and persist", async () => {
+  const collectionCollapse0 = await LS("wow-mount-tracker:collapsed");
+  const third = await ev(entryName(`document.querySelectorAll('.quest-entry')[2]`));
+  await mclick(`document.querySelectorAll('.quest-entry')[2]`);
+  eq(await selectedName(), third, "selection moved");
+  eq(await detailTitle(), third, "details followed");
+  const firstCat = `document.querySelector('.quest-category-toggle')`;
+  const inFirst = await ev(`document.querySelector('.quest-category .quest-entries').children.length`);
+  const total = await count(".quest-entry");
+  await mclick(firstCat);
+  eq(await ev(`${firstCat}.getAttribute('aria-expanded')`), "false", "collapsed");
+  eq(await count(".quest-entry"), total - inFirst, "its quests are hidden");
+  eq(await detailTitle(), third, "details stay on the selected quest");
+  ok(JSON.parse(await LS(questCollapseKey)).length === 1, "collapse stored");
+  await reloadToQuests();
+  eq(await ev(`${firstCat}.getAttribute('aria-expanded')`), "false", "still collapsed after reload");
+  await mclick(`${firstCat}`);
+  eq(await count(".quest-entry"), total, "expanded again");
+  await mclick(byText(".quest-log .filter-button", "Collapse all"));
+  eq(await count(".quest-entry"), 0, "Collapse all");
+  eq(await ev(`${$$(".quest-category-toggle")}.every(b=>b.getAttribute('aria-expanded')==='false')`), true);
+  await mclick(byText(".quest-log .filter-button", "Expand all"));
+  eq(await count(".quest-entry"), total, "Expand all");
+  eq(await LS("wow-mount-tracker:collapsed"), collectionCollapse0, "Collection collapse state untouched");
+});
+await t("questlog", "owned mounts hidden by default; 'Include collected' adds collected quests and rewards", async () => {
+  eq(await count(".quest-reward .mount-icon-link.owned"), 0, "no owned reward on the selected quest");
+  eq(await count(".quest-entry.collected"), 0, "no fully-collected quests by default");
+  const before = await count(".quest-entry");
   await mclick(byText(".toggle", "Include collected"));
-  ok((await count(".farm-mount")) > before, "more rows with collected included");
-  ok((await count(".farm-mount .mount-icon-link.owned")) > 0, "owned rows shown");
+  ok((await count(".quest-entry")) > before, "more quests with collected included");
+  ok((await count(".quest-entry.collected")) > 0, "collected quests marked");
+  await mclick(`document.querySelector('.quest-entry.collected')`);
+  ok((await count(".quest-reward .mount-icon-link.owned")) > 0, "owned rewards shown");
+  ok(/Collected/.test(await text(".quest-reward-source")), "reward says Collected");
   await mclick(byText(".toggle", "Include collected"));
 });
-await t("dailies", "Done button moves card to Completed; Undo, hide-completed, persists, auto-expires at reset", async () => {
-  const left0 = parseInt((await text(".dailies-summary")).match(/(\d+) left this reset/)[1]);
-  const firstTitle = await text(".farm-card-title");
-  const cards0 = await count(".farm-card");
-  eq(await count(".dailies-completed"), 0, "no Completed section before anything is done");
-  await mclick(`document.querySelector('.farm-done-button:not(.undo)')`);
-  eq(await count(".dailies-completed .farm-card.done"), 1, "card moved to Completed");
-  eq(await ev(`document.querySelector('.dailies-completed .farm-card-title').textContent`), firstTitle, "the clicked card");
-  eq(await ev(`[...document.querySelectorAll('.dailies-group:not(.dailies-completed) .farm-card-title')].filter(e=>e.textContent===${JSON.stringify(firstTitle)}).length`), 0, "gone from its group");
-  eq(await count(".farm-card"), cards0, "card moved, not duplicated");
-  ok(/^Back in /.test(await text(".dailies-completed .farm-done-back")), "shows when it comes back");
+await t("questlog", "Done moves the quest to Completed; Undo, Hide completed, persists, auto-expires at reset", async () => {
+  await mclick(`document.querySelector('.quest-entry')`);
+  const left0 = await leftThisReset();
+  const firstTitle = await selectedName();
+  const entries0 = await count(".quest-entry");
+  eq(await count(".quest-category.completed"), 0, "no Completed category before anything is done");
+  await mclick(`document.querySelector('.quest-button:not(.undo)')`);
+  eq(await ev(`[...document.querySelectorAll('.quest-category.completed .quest-entry-name')].map(e=>e.textContent).join('|')`), firstTitle, "quest moved to Completed");
+  eq(await ev(`[...document.querySelectorAll('.quest-category:not(.completed) .quest-entry-name')].filter(e=>e.textContent===${JSON.stringify(firstTitle)}).length`), 0, "gone from its category");
+  eq(await count(".quest-entry"), entries0, "moved, not duplicated");
+  eq(await ev(`document.querySelector('.quest-category.completed .quest-entry').getAttribute('aria-current')`), "true", "still selected");
+  ok(/\(Complete\)/.test(await detailTitle()), "details say (Complete)");
+  ok(/^1\/1$|: 1\/1$/.test((await text(".quest-objectives li")).trim()), "objective shows 1/1");
+  ok(/^Back in /.test(await text(".quest-reset")), "shows when it comes back");
+  eq(await count(".quest-button.undo"), 1, "Undo offered");
   const stored = JSON.parse(await LS(doneKey)); const k = Object.keys(stored)[0];
   ok(k && stored[k].cadence && Number.isInteger(stored[k].period), "stored {cadence, period}");
-  eq(parseInt((await text(".dailies-summary")).match(/(\d+) left this reset/)[1]), left0 - 1, "left-this-reset decremented");
+  eq(await leftThisReset(), left0 - 1, "left-this-reset decremented");
   await mclick(byText(".toggle", "Hide completed"));
-  eq(await count(".dailies-completed"), 0, "Completed section hidden");
-  eq(await count(".farm-card"), cards0 - 1, "completed card hidden");
+  eq(await count(".quest-category.completed"), 0, "Completed category hidden");
+  eq(await count(".quest-entry"), entries0 - 1, "completed quest hidden");
   await mclick(byText(".toggle", "Hide completed"));
-  // Undo puts it back, then mark it done again for the persistence checks
-  await mclick(`document.querySelector('.farm-done-button.undo')`);
-  eq(await count(".dailies-completed"), 0, "Undo empties Completed");
-  eq(await text(".farm-card-title"), firstTitle, "Undo returns the card to its place");
-  eq(parseInt((await text(".dailies-summary")).match(/(\d+) left this reset/)[1]), left0, "left-this-reset restored");
-  await mclick(`document.querySelector('.farm-done-button:not(.undo)')`);
-  await ev(`location.reload()`); await wait(`document.readyState==='complete' && document.querySelector('.view-tab')`, 20000); await sleep(1000);
-  await mclick(byText(".view-tab", "Dailies"));
-  eq(await count(".dailies-completed .farm-card"), 1, "still completed after reload");
+  // Undo from the Completed category puts it back
+  await mclick(`document.querySelector('.quest-category.completed .quest-entry')`);
+  await mclick(`document.querySelector('.quest-button.undo')`);
+  eq(await count(".quest-category.completed"), 0, "Undo empties Completed");
+  eq(await ev(entryName(`document.querySelector('.quest-entry')`)), firstTitle, "Undo returns the quest to its place");
+  eq(await detailTitle(), firstTitle, "and it stays selected");
+  eq(await leftThisReset(), left0, "left-this-reset restored");
+  // With Hide completed on, Done moves the selection to the next quest
+  await mclick(byText(".toggle", "Hide completed"));
+  const second = await ev(entryName(`document.querySelectorAll('.quest-entry')[1]`));
+  await mclick(`document.querySelector('.quest-button:not(.undo)')`);
+  eq(await selectedName(), second, "selection moved on to the next quest");
+  await mclick(byText(".toggle", "Hide completed"));
+  await reloadToQuests();
+  eq(await count(".quest-category.completed .quest-entry"), 1, "still completed after reload");
   // simulate the reset passing: rewind the stored period by one
   const s = JSON.parse(await LS(doneKey)); for (const key of Object.keys(s)) s[key].period -= 1;
   await ev(`localStorage.setItem(${JSON.stringify(doneKey)}, ${JSON.stringify(JSON.stringify(s))})`);
-  await ev(`location.reload()`); await wait(`document.readyState==='complete' && document.querySelector('.view-tab')`, 20000); await sleep(1000);
-  await mclick(byText(".view-tab", "Dailies"));
-  eq(await count(".dailies-completed"), 0, "expired completion back in the list after reset");
-  eq(await text(".farm-card-title"), firstTitle, "card back in its group");
+  await reloadToQuests();
+  eq(await count(".quest-category.completed"), 0, "expired completion back in the list after reset");
+  eq(await ev(entryName(`document.querySelector('.quest-entry')`)), firstTitle, "quest back in its category");
   await ev(`localStorage.removeItem(${JSON.stringify(doneKey)})`);
 });
-await t("dailies", "switching tabs keeps Collection state; region reset label follows the character", async () => {
+await t("questlog", "switching tabs keeps Collection state; region reset label follows the character", async () => {
   await mclick(byText(".view-tab", "Collection"));
   eq(await count(".mount-icon-link"), relevant.length);
 });
@@ -696,12 +757,15 @@ async function overflow() {
   return ev(`(()=>{const w=innerWidth; const bad=[]; document.querySelectorAll('main *').forEach(e=>{const r=e.getBoundingClientRect(); if(r.width>0 && r.right>w+1 && getComputedStyle(e).position!=='fixed') bad.push(e.tagName.toLowerCase()+'.'+(e.className||'').toString().split(' ')[0]+':'+Math.round(r.right))}); return [...new Set(bad)].slice(0,6)})()`);
 }
 for (const [w, h] of [[320, 640], [390, 844], [768, 1024]]) {
-  await t("responsive", `${w}px wide: nothing pushes past the viewport (Collection + Dailies)`, async () => {
+  await t("responsive", `${w}px wide: nothing pushes past the viewport (Collection + Quest Log)`, async () => {
     await setViewport(w, h); await load();
     await mclick(byText(".mount-icon-link ~ *", "__none__")).catch(() => {});
     let bad = await overflow(); eq(bad.length, 0, "Collection overflow: " + bad);
-    await mclick(byText(".view-tab", "Dailies")); await sleep(400);
-    bad = await overflow(); eq(bad.length, 0, "Dailies overflow: " + bad);
+    await mclick(byText(".view-tab", "Quest Log")); await sleep(400);
+    bad = await overflow(); eq(bad.length, 0, "Quest Log overflow: " + bad);
+    // Narrow windows stack the details under the list; wider ones sit side by side.
+    const stacked = await ev(`document.querySelector('.quest-detail').getBoundingClientRect().top >= document.querySelector('.quest-list').getBoundingClientRect().bottom - 1`);
+    eq(stacked, w <= 760, "quest details " + (w <= 760 ? "below" : "beside") + " the list");
     ok(await ev(`document.querySelector('.theme-switcher').getBoundingClientRect().right <= innerWidth`), "theme switcher visible");
   });
 }
@@ -794,9 +858,12 @@ await t("storage", "with localStorage blocked: loads, scans, themes, collapses -
     await mclick(byText(".filter-button", "Collapse all"));
     eq(await count(".mount-icon-link"), 0, "collapse works in-session");
     await mclick(byText(".filter-button", "Expand all"));
-    await mclick(byText(".view-tab", "Dailies"));
-    await mclick(`document.querySelector('.farm-done-button:not(.undo)')`);
-    eq(await count(".dailies-completed .farm-card"), 1, "Dailies done works in-session");
+    await mclick(byText(".view-tab", "Quest Log"));
+    await mclick(`document.querySelector('.quest-category-toggle')`);
+    eq(await ev(`document.querySelector('.quest-category-toggle').getAttribute('aria-expanded')`), "false", "Quest Log collapse works in-session");
+    await mclick(`document.querySelector('.quest-category-toggle')`);
+    await mclick(`document.querySelector('.quest-button:not(.undo)')`);
+    eq(await count(".quest-category.completed .quest-entry"), 1, "Quest Log done works in-session");
   } finally { await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: reg }); }
   await load(); // fresh document: storage available again
   await ev(`localStorage.setItem('wow-mount-tracker:theme', JSON.stringify({theme:'dark',overrides:{}}))`);
@@ -821,7 +888,7 @@ await t("keyboard", "Tab reaches every control in a sensible order, each with a 
   const noRing = real.filter((s) => !s.visible).map((s) => s.label || s.cls);
   ok(noRing.length === 0, "no visible focus indicator on: " + noRing.join(", "));
   const idx = (l) => order.findIndex((x) => x.startsWith(l));
-  ok(idx("Collection") >= 0 && idx("Dailies") > idx("Collection"), "tabs reachable in order");
+  ok(idx("Collection") >= 0 && idx("Quest Log") > idx("Collection"), "tabs reachable in order");
   ok(order.some((x) => /^Realm|^Tichondrius|^US/.test(x)) || real.some((s) => s.tag === "input" || s.tag === "select"), "search inputs reachable");
   ok(real.some((s) => s.cls === "segment-input"), "filter radios reachable");
   ok(real.some((s) => s.cls === "toggle-input"), "Show retired toggle reachable");

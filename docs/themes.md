@@ -1,7 +1,7 @@
 # Themes
 
 The header has a theme switcher (round colour chips, right of the Collection /
-Dailies tabs). The choice is saved in localStorage and applied before first
+Quest Log tabs). The choice is saved in localStorage and applied before first
 paint. **Dark is the default** and is rendered server-side, so a first-time
 visitor never sees an unthemed page. It does not follow the OS light/dark
 setting.
@@ -71,8 +71,10 @@ compact dashboard of every expansion. **Expand all** / **Collapse all** are in
 the filter bar and act on the sections currently on screen. Collapsed sections
 aren't rendered at all, which also keeps the page light. State is saved in
 localStorage (`wow-mount-tracker:collapsed`, by section title) and works the
-same in every theme. Sections are expanded by default. The Dailies groups
-aren't collapsible.
+same in every theme. Sections are expanded by default. The Quest Log's
+categories collapse the same way (with in-game style [+]/[-] boxes and their
+own Expand all / Collapse all), saved separately in
+`wow-mount-tracker:quest-log-collapsed`.
 
 ## Filter bar and toggles
 
@@ -83,7 +85,7 @@ and glossy accent fill as the XP bars):
 - `components/SegmentedControl.js` - All / Collected / Uncollected (real radio
   inputs; Collected/Uncollected are disabled until a character is scanned).
 - `components/Toggle.js` - on/off switch (real checkbox, `role="switch"`), used
-  for "Show retired" and for the two Dailies options ("Hide completed",
+  for "Show retired" and for the two Quest Log options ("Hide completed",
   "Include collected mounts").
 - Expand all / Collapse all buttons, with chevrons that match the section
   headings (down = expanded, right = collapsed).
@@ -123,14 +125,17 @@ copy the "Current mix" line (or just read the axis values) into `picks` in
 ## Behaviour notes
 
 - "Dim missing", the dashed ring and "Silhouette missing" only apply to the
-  Collection grid. The Dailies tab lists missing mounts on purpose, so they stay
-  full colour there. Collected mounts on Dailies still get the highlight.
+  Collection grid. The Quest Log lists missing mounts on purpose, so they stay
+  full colour there. Collected mounts in the Quest Log still get the highlight.
 - Nothing is dimmed before a character is scanned (`MountIcon` treats
   "no scan" as neutral, distinct from "scanned and missing").
 - Always on, independent of theme: a "Collected" line in the tooltip of owned
   mounts, and "(collected)" in their aria-label.
-- The Dailies cadence pills (daily/weekly) have darker colours on the Light
-  theme so they stay readable on parchment.
+- Both Quest Log panes follow the theme: palette colours for the list, the
+  detail page (the same panel slab as the cards) and the accent-filled Done
+  button, and the theme's heading font for the quest title and section
+  headings (QUEST LOG block in `app/themes.css`). The daily/weekly and
+  "unverified" pills have darker colours on the Light theme.
 
 ## Files
 

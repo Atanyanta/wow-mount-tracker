@@ -13,6 +13,15 @@ function cacheKey({ region, realm, name }) {
   return `wow-mount-tracker:owned:${region}:${realm.trim().toLowerCase()}:${name.trim().toLowerCase()}`;
 }
 
+// WoW character names are always a capital first letter and the rest lower
+// case ("kurowastaken" -> "Kurowastaken"). The API returns the exact spelling
+// after a scan; this covers searches saved before that (and scripts with no
+// case, like Korean, pass through unchanged).
+function formatCharacterName(name) {
+  const trimmed = name.trim();
+  return trimmed.charAt(0).toLocaleUpperCase() + trimmed.slice(1).toLocaleLowerCase();
+}
+
 function readCache(query) {
   try {
     const raw = localStorage.getItem(cacheKey(query));
@@ -61,7 +70,7 @@ export default function SearchBar({ onScanResult }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegion(lastRegion);
       setRealm(realmName);
-      setName(last.name || "");
+      setName(formatCharacterName(last.name || ""));
       const cached =
         readCache({ region: lastRegion, realm: realmSlug, name: last.name || "" }) ??
         readCache({ region: lastRegion, realm: last.realm || "", name: last.name || "" });
@@ -75,11 +84,9 @@ export default function SearchBar({ onScanResult }) {
           faction: cached.faction ?? null,
           character: { region: lastRegion, realm: realmSlug, name: last.name || "" },
         });
+        // Restored silently: the filled-in form and the "Rescan" button already
+        // say whose collection this is.
         setLastFetchedAt(cached.fetchedAt);
-        setStatus({
-          type: "info",
-          text: `Showing cached collection for ${last.name} (${realmName}) from ${new Date(cached.fetchedAt).toLocaleString()}`,
-        });
       }
     } catch {
       // ignore malformed localStorage state
@@ -139,18 +146,23 @@ export default function SearchBar({ onScanResult }) {
         setStatus({ type: "error", text: data.error || "Lookup failed" });
         return;
       }
-      writeCache(query, data.ownedIds, data.usableIds, data.faction);
+      // Show and save the name as the game spells it, whatever was typed. (The
+      // cache and "done" keys are lower-cased, so this doesn't change them.)
+      const saved = { ...query, name: data.name || formatCharacterName(query.name) };
+      writeCache(saved, data.ownedIds, data.usableIds, data.faction);
       onScanResult({
         ownedIds: new Set(data.ownedIds),
         usableIds: data.usableIds ? new Set(data.usableIds) : null,
         faction: data.faction ?? null,
-        character: query,
+        character: saved,
       });
+      setName(saved.name);
+      setRealm(realmLabel);
       const now = Date.now();
       setLastFetchedAt(now);
       setStatus({
         type: "info",
-        text: `Loaded ${data.ownedIds.length} owned mounts for ${query.name} (${realmLabel}) just now.`,
+        text: `Loaded ${data.ownedIds.length} owned mounts for ${saved.name} (${realmLabel}) just now.`,
       });
     } catch {
       setStatus({ type: "error", text: "Network error, try again." });

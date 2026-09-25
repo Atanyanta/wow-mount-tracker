@@ -3,8 +3,9 @@
 A personal Next.js app that shows every World of Warcraft mount as an icon,
 grouped by expansion, patch and source, with PvP and Trading Post mounts in
 their own sections. Scan a character to mark owned mounts and see collected /
-usable counts, and use the **Dailies** tab to track missing mounts from
-dungeon, raid and world bosses on a daily or weekly lockout.
+usable counts, and use the **Quest Log** tab (styled after the in-game quest
+log) to track missing mounts from dungeon, raid and world bosses on a daily or
+weekly lockout.
 
 Mount data, icons and tooltips are built ahead of time into `data/` and
 `public/icons/`, so the page makes no external calls except the character scan.

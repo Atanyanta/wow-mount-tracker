@@ -149,9 +149,11 @@ mounts, only the in-game client does.
   scanned/uploaded. The user does not want to depend on third-party scans, so
   don't add rank features or links to those sites.
 
-## Dailies tab (repeatable kills on a daily/weekly lockout)
+## Quest Log tab (repeatable kills on a daily/weekly lockout)
 
-A second view next to Collection (toggle in `app/page.js`) listing only the
+Formerly the "Dailies" tab (renamed 2026-09-25; the data file, `check:farmables`
+and the `done:` localStorage keys keep their old names). A second view next to
+Collection (toggle in `app/page.js`, view id `"quests"`) listing only the
 mounts the scanned character is missing that drop from **dungeon bosses, raid
 bosses and world bosses** on a daily/weekly lockout: raids (weekly), world
 bosses (weekly), heroic and Mythic 0 dungeons (daily). Scope is deliberately
@@ -184,11 +186,26 @@ no lockout) and weekly-quest chance rewards are all in the `excluded` list of
   Wed). Times are treated as **fixed UTC** - sources disagreed on DST; if a
   reset ever looks an hour off, fix `RESET_SCHEDULES` (verify in game with
   `/run print(C_DateAndTime.GetSecondsUntilDailyReset(), C_DateAndTime.GetSecondsUntilWeeklyReset())`).
-- **`components/DailiesView.js`** - UI. Each card has a **Done** button; a done
-  card moves out of its group into a "Completed this reset" section at the
-  bottom (with "Back in ..." countdown and an **Undo** button) and returns to its
-  group by itself when its period expires. "Hide completed" hides that section.
-  `SearchBar` now passes
+- **`components/QuestLog.js`** - UI, laid out like the in-game quest log: a
+  list pane on the left (one collapsible category per `farmables.json` group,
+  [+]/[-] boxes, state in `questLogCollapse` from `lib/collapseStore.js`) and a
+  parchment detail pane on the right for the selected quest - Objectives (one
+  "<boss> slain: 0/1" per boss), Description (built from zone / expansion /
+  difficulty + the lockout schedule; difficulties starting "Unspecified" are
+  left out; there is no hand-written flavour text), Rewards (the mounts, as
+  `MountIcon`s) and a
+  **Done** button. A done quest moves into a "Completed this reset" category
+  at the bottom of the list (the details show "(Complete)", "Back in ..." and
+  **Undo**) and returns by itself when its period expires; "Hide completed"
+  hides that category (and Done then moves the selection to the next quest).
+  Selection is by activity id and falls back to the first quest in the list.
+  Below 760px the panes stack and picking a quest scrolls to its details.
+  Layout CSS is in `globals.css`, colours/fonts in the QUEST LOG block of
+  `themes.css`; both panes and the Done button take the theme's palette and
+  heading font. **Never show `farmables.json` `note`s in the UI**: they are
+  curation notes ("post my knowledge cutoff", "the app treats...") and the
+  user found them reading like internal/AI text - they belong in
+  `docs/farmables-review.md` only. `SearchBar` passes
   `character: { region, realm, name }` up with each scan result so the tab
   knows which region's reset to use and where to store completion.
 
@@ -220,7 +237,7 @@ palette. `components/StylePicker.js` (the "Customize" panel) is design-time
 scaffolding, **hidden by default** - set `NEXT_PUBLIC_THEME_CUSTOMIZER=1` in
 `.env.local` and restart dev to show it; remove it once bundles are settled.
 The filter bar is built from `SegmentedControl` + `Toggle` (also used for the
-Dailies options) and holds the Expand all / Collapse all buttons. Inline
+Quest Log options) and holds the Expand all / Collapse all buttons. Inline
 scripts in a layout must go through `components/InlineScript.js`, or React
 reports a "script tag while rendering" error whenever hot reload re-renders the
 layout. Any server-rendered form input whose `disabled`/`checked` changes on the
@@ -247,14 +264,23 @@ slugs differ: Azjol-Nerub is `azjolnerub`). `SearchBar` validates the realm
 against the list before any request and sends the slug; `app/api/collections`
 does the same check server-side (400 "Unknown realm"). Cache/"done" keys use
 the slug; old saved searches (realm as typed) still restore. Editing the form
-clears an error message. If a region has no list, both sides fall back to free
+clears an error message. A cached scan is restored silently on page load (no
+status line); after a scan the form shows the realm's proper name and the
+character name as the game spells it (`name` from the profile call in
+`/api/collections`, with a capital-first fallback for older saved searches),
+so "kurowastaken" becomes "Kurowastaken".
+
+`html` has `scrollbar-gutter: stable` (`globals.css`): without it, Collapse all
+(or anything else that makes the page shorter than the window) removed the
+scrollbar and the centred content jumped ~8px sideways in Firefox. Headless
+Chrome doesn't show that jump, so the regression check is in `docs/qa/ff.mjs`. If a region has no list, both sides fall back to free
 text rather than blocking searches.
 
 ## QA
 
 `docs/qa-report.md` is the QA record (what was tested, run history, bugs found
 and fixed, what is still untested) and `docs/qa/` holds the runnable suites:
-`qa.mjs` (Node + Chrome, 91 checks), `ff.mjs` (Firefox over WebDriver BiDi, 48
+`qa.mjs` (Node + Chrome, 92 checks), `ff.mjs` (Firefox over WebDriver BiDi, 51
 checks - Firefox is the user's browser), `realms-unit.mjs` and `leak.mjs`. Re-run them after
 UI/API changes and keep the report current. `app/api/collections/route.js`
 validates realm/character slugs (`SLUG_PATTERN`: letters of any script, digits,
@@ -263,7 +289,7 @@ hyphens, max 64) before building the Blizzard URL - keep that when editing it.
 ## Tooltip edge flip
 
 Tooltips are left-anchored to the icon (`globals.css`), so `lib/tooltipFlip.js`
-(a delegated `onMouseOver`/`onFocus` on `MountGrid` and `DailiesView`, not per
+(a delegated `onMouseOver`/`onFocus` on `MountGrid` and `QuestLog`, not per
 icon) adds `.tip-right` to icons near the right edge of the window. New views
 that render `MountIcon`s need the same handler on their container.
 

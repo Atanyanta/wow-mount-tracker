@@ -12,6 +12,10 @@
 
 html {
   height: 100%;
+  /* Always reserve the scrollbar's space. Otherwise collapsing sections (or
+     switching tabs) can make the page short enough to lose its scrollbar, and
+     the centred content jumps sideways by the scrollbar's width. */
+  scrollbar-gutter: stable;
 }
 
 html,
@@ -181,155 +185,279 @@ main {
   border-bottom-color: #ffd100;
 }
 
-.dailies-summary {
+/* ------------------------------------------------------------------ */
+/* Quest Log tab (components/QuestLog.js): a quest list on the left,   */
+/* the selected quest's details on the right. Layout lives here;       */
+/* colours and fonts come from the theme (QUEST LOG in themes.css).    */
+/* ------------------------------------------------------------------ */
+.quest-log-summary {
   font-size: 0.95rem;
   font-weight: 600;
   opacity: 0.85;
   margin-bottom: 0.25rem;
 }
 
-.dailies-resets {
+.quest-log-resets {
   font-size: 0.85rem;
   opacity: 0.8;
   margin-bottom: 1rem;
 }
 
-.dailies-resets-detail {
+.quest-log-resets-detail {
   opacity: 0.7;
 }
 
-.dailies-empty {
+.quest-log-empty {
   padding: 1.5rem 0;
   opacity: 0.7;
 }
 
-.dailies-group {
-  margin-bottom: 2rem;
-}
-
-.farm-card-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.farm-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  width: 19rem;
-  max-width: 100%;
-  padding: 0.75rem;
+.quest-log-frame {
+  display: grid;
+  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
+  min-height: 30rem;
   border: 1px solid rgba(128, 128, 128, 0.3);
-  border-radius: 8px;
-}
-
-/* Dim the content of completed cards but not their actions, so Undo stays
-   readable (opacity on the card itself would fade the button too). */
-.farm-card.done > :not(.farm-card-actions) {
-  opacity: 0.5;
-}
-
-.farm-card-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.farm-card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.farm-cadence {
-  flex-shrink: 0;
-  padding: 0.05rem 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-radius: 999px;
-  border: 1px solid rgba(128, 128, 128, 0.4);
-}
-
-.farm-cadence.daily {
-  color: #5dade2;
-  border-color: #5dade2;
-}
-
-.farm-cadence.weekly {
-  color: #f5b041;
-  border-color: #f5b041;
-}
-
-.farm-card-meta,
-.farm-card-difficulty {
-  font-size: 0.75rem;
-  opacity: 0.7;
-}
-
-.farm-unverified {
-  margin-left: 0.5rem;
-  padding: 0 0.35rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #d9534f;
-  border: 1px solid #d9534f;
   border-radius: 4px;
 }
 
-.farm-mounts {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin: 0.25rem 0;
+/* Left pane: scrolls on its own so a long list never pushes the details
+   away. */
+.quest-list {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+  border-right: 1px solid rgba(128, 128, 128, 0.3);
 }
 
-.farm-mount {
+.quest-category + .quest-category {
+  margin-top: 0.25rem;
+}
+
+.quest-category-toggle {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
 }
 
-.farm-mount-text {
+.quest-category-title {
+  flex: 1;
+}
+
+.quest-category-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+/* The in-game [+] / [-] box: a square with a bar, plus a vertical bar while
+   collapsed. */
+.quest-category-box {
+  position: relative;
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  opacity: 0.85;
+}
+
+.quest-category-box::before,
+.quest-category-box::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.quest-category-box::before {
+  width: 7px;
+  height: 1.5px;
+}
+
+.quest-category-box::after {
+  width: 1.5px;
+  height: 7px;
+  display: none;
+}
+
+.quest-category-toggle[aria-expanded="false"] .quest-category-box::after {
+  display: block;
+}
+
+.quest-entries {
+  list-style: none;
+}
+
+.quest-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.3rem 0.75rem 0.3rem 2.1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quest-entry-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-entry-status {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+/* Done this reset, or (with "Include collected" on) nothing left to collect. */
+.quest-entry:is(.done, .collected) {
+  opacity: 0.6;
+}
+
+/* Right pane: the selected quest. */
+.quest-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.quest-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.quest-title-status {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.quest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+}
+
+.quest-cadence,
+.quest-unverified {
+  padding: 0.05rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.quest-section-heading {
+  margin: 1.1rem 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.quest-objectives {
+  list-style: none;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.quest-objectives li::before {
+  content: "- ";
+}
+
+.quest-description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.quest-rewards-intro {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.quest-rewards {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  gap: 0.5rem;
+}
+
+.quest-reward {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+}
+
+.quest-reward-text {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.farm-mount-name {
-  font-size: 0.85rem;
-  font-weight: 600;
+.quest-reward-name {
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
-.farm-mount-boss {
+.quest-reward-source {
   font-size: 0.72rem;
-  opacity: 0.65;
 }
 
-.farm-card-note {
-  font-size: 0.7rem;
-  font-style: italic;
-  opacity: 0.6;
-}
-
-.farm-card-actions {
+.quest-detail-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.6rem;
   margin-top: auto;
-  padding-top: 0.35rem;
+  padding-top: 1.25rem;
 }
 
-.farm-done-back {
-  margin-right: auto;
-  font-size: 0.75rem;
-  opacity: 0.7;
+.quest-reset {
+  font-size: 0.8rem;
+}
+
+/* Phones and narrow windows: stack the list above the details. */
+@media (max-width: 760px) {
+  .quest-log-frame {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .quest-list {
+    max-height: 50vh;
+    border-right: 0;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+  }
+  .quest-detail {
+    padding: 1rem;
+    scroll-margin-top: 0.5rem;
+  }
 }
 
 .expansion-section {

@@ -6,13 +6,13 @@ import SearchBar from "@/components/SearchBar";
 import FilterBar from "@/components/FilterBar";
 import CollectionSummary from "@/components/CollectionSummary";
 import MountGrid from "@/components/MountGrid";
-import DailiesView from "@/components/DailiesView";
+import QuestLog from "@/components/QuestLog";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { collapseSections, expandSections } from "@/lib/collapseStore";
 import { sectionTitles } from "@/lib/groupMounts";
 
 export default function Home() {
-  const [view, setView] = useState("collection"); // "collection" | "dailies"
+  const [view, setView] = useState("collection"); // "collection" | "quests"
   const [ownedIds, setOwnedIds] = useState(null);
   const [usableIds, setUsableIds] = useState(null);
   const [faction, setFaction] = useState(null);
@@ -81,7 +81,7 @@ export default function Home() {
         <div className="view-tabs" role="tablist">
           {[
             ["collection", "Collection"],
-            ["dailies", "Dailies"],
+            ["quests", "Quest Log"],
           ].map(([value, label]) => (
             <button
               key={value}
@@ -121,7 +121,7 @@ export default function Home() {
           <MountGrid mounts={filteredMounts} ownedIds={ownedIds} countMounts={availableMounts} />
         </>
       ) : (
-        <DailiesView ownedIds={ownedIds} faction={faction} character={character} />
+        <QuestLog ownedIds={ownedIds} faction={faction} character={character} />
       )}
     </main>
   );

@@ -90,7 +90,7 @@ for (let n = 1; n <= 4; n++) {
   console.log(`   reload #${n}${n === 3 ? " (after clicking 'Collected')" : ""}: DOM radios before hydration = ${JSON.stringify(pre.radios)} ${restored ? "<- Firefox altered the server HTML" : "(matches server HTML)"}; after = ${JSON.stringify(now)}`);
   showHydration(`reload #${n}`);
   check(`reload #${n}: zero hydration errors`, hydrationErrors() === 0, hydrationErrors() ? logs.filter((l) => /hydrat/i.test(l.text))[0].text.slice(0, 120) : "");
-  check(`reload #${n}: cached scan restored + filter radios enabled`, /Showing cached collection/.test(await ev("document.querySelector('.search-status')?.textContent ?? ''")) && (await ev("[...document.querySelectorAll('.segment-input')].every(i=>!i.disabled)")) === true);
+  check(`reload #${n}: cached scan restored silently + filter radios enabled`, (await ev("document.querySelectorAll('.mount-icon-link.owned').length")) > 0 && (await ev("!!document.querySelector('.search-status')")) === false && (await ev("document.querySelector('.search-bar input[placeholder=\"Character name\"]').value")) === "Kurowastaken" && (await ev("[...document.querySelectorAll('.segment-input')].every(i=>!i.disabled)")) === true);
   const other = problems().filter((p) => !/hydrat/i.test(p));
   check(`reload #${n}: no other console errors`, other.length === 0, other.join(" || "));
 }
@@ -134,22 +134,49 @@ const tip = await ev(`(()=>{const t=document.querySelector('.mount-icon-link:hov
 check("hover tooltip appears, on-screen, says Collected (real pointer move)", !!tip && tip.d === "flex" && tip.l >= 0 && tip.r <= tip.w && tip.txt, JSON.stringify(tip));
 await shot("tooltip");
 
-console.log("\n[4] Dailies in Firefox");
+console.log("\n[4] Quest Log in Firefox");
 await ev(`window.scrollTo(0,0)`);
-await clickText(".view-tab", "Dailies");
+await clickText(".view-tab", "Quest Log");
 await sleep(400);
-check("Dailies renders cards + summary", (await ev("document.querySelectorAll('.farm-card').length")) > 5 && /uncollected mounts across/.test(await ev("document.querySelector('.dailies-summary').textContent")));
-const before = await ev("parseInt(document.querySelector('.dailies-summary').textContent.match(/(\\d+) left this reset/)[1])");
-await ev(`document.querySelector('.farm-done-button:not(.undo)').click()`);
+check("Quest Log renders list + details + summary", (await ev("document.querySelectorAll('.quest-entry').length")) > 5 && (await ev("document.querySelector('.quest-title').textContent")) === (await ev("document.querySelector('.quest-entry[aria-current=\"true\"] .quest-entry-name').textContent")) && /uncollected mounts across/.test(await ev("document.querySelector('.quest-log-summary').textContent")));
+await ev(`document.querySelectorAll('.quest-entry')[3].click()`);
 await sleep(200);
-check("Done decrements 'left this reset' and moves the card to Completed", (await ev("parseInt(document.querySelector('.dailies-summary').textContent.match(/(\\d+) left this reset/)[1])")) === before - 1 && (await ev("document.querySelectorAll('.dailies-completed .farm-card').length")) === 1);
+check("clicking a quest shows its details", (await ev("document.querySelector('.quest-title').textContent")) === (await ev("document.querySelectorAll('.quest-entry')[3].querySelector('.quest-entry-name').textContent")));
+await ev(`document.querySelector('.quest-category-toggle').click()`);
+await sleep(200);
+check("category collapses", (await ev("document.querySelector('.quest-category-toggle').getAttribute('aria-expanded')")) === "false");
+await ev(`document.querySelector('.quest-category-toggle').click()`);
+await sleep(200);
+// Collapse all makes the page short enough to lose its scrollbar; without
+// `scrollbar-gutter: stable` (globals.css) the centred content then jumped
+// ~8px sideways. Only Firefox shows this - headless Chrome keeps the layout.
+{
+  await must("browsingContext.setViewport", { context: ctx, viewport: { width: 2560, height: 1000 } });
+  await sleep(300);
+  const frameLeft = `(async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); return document.querySelector('.quest-log-frame').getBoundingClientRect().left})()`;
+  const a = await ev(frameLeft);
+  await clickText(".quest-log .filter-button", "Collapse all"); await sleep(300);
+  const b = await ev(frameLeft);
+  const short = await ev("document.documentElement.scrollHeight <= innerHeight");
+  await clickText(".quest-log .filter-button", "Expand all"); await sleep(300);
+  const c = await ev(frameLeft);
+  check("Collapse all / Expand all don't shift the page sideways", short && a === b && b === c, `${a} / ${b} / ${c}${short ? "" : " (page never got short)"}`);
+  await must("browsingContext.setViewport", { context: ctx, viewport: { width: 1400, height: 1000 } });
+  await sleep(300);
+}
+const before = await ev("parseInt(document.querySelector('.quest-log-summary').textContent.match(/(\\d+) left this reset/)[1])");
+await ev(`document.querySelector('.quest-button:not(.undo)').click()`);
+await sleep(200);
+check("Done decrements 'left this reset' and moves the quest to Completed", (await ev("parseInt(document.querySelector('.quest-log-summary').textContent.match(/(\\d+) left this reset/)[1])")) === before - 1 && (await ev("document.querySelectorAll('.quest-category.completed .quest-entry').length")) === 1);
 await reload();
-await clickText(".view-tab", "Dailies");
-check("done state persists across a Firefox reload", (await ev("document.querySelectorAll('.dailies-completed .farm-card').length")) === 1);
-await shot("dailies");
-await ev(`document.querySelector('.farm-done-button.undo').click()`); // clean up
+await clickText(".view-tab", "Quest Log");
+check("done state persists across a Firefox reload (no hydration error)", (await ev("document.querySelectorAll('.quest-category.completed .quest-entry').length")) === 1 && hydrationErrors() === 0);
+await shot("quest-log");
+await ev(`document.querySelector('.quest-category.completed .quest-entry').click()`);
 await sleep(200);
-check("Undo returns the card", (await ev("document.querySelectorAll('.dailies-completed').length")) === 0);
+await ev(`document.querySelector('.quest-button.undo').click()`); // clean up
+await sleep(200);
+check("Undo returns the quest", (await ev("document.querySelectorAll('.quest-category.completed').length")) === 0);
 
 console.log("\n[6] Realm type-ahead in Firefox");
 const { readFileSync: readFs } = await import("node:fs");

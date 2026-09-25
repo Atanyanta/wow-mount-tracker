@@ -31,8 +31,7 @@
 }
 
 html .search-bar,
-html .filter-bar,
-html .farm-card {
+html .filter-bar {
   border-color: var(--line);
 }
 html .source-card {
@@ -181,22 +180,11 @@ html[data-palette="light"] {
   --tip-title: #ffd100;
 }
 
-/* The Dailies cadence pills were tuned for dark backgrounds; darken them on
-   the parchment-coloured Light theme so they stay readable. */
-html[data-palette="light"] .farm-cadence.daily {
-  color: #1c6a9a;
-  border-color: #1c6a9a;
-}
-html[data-palette="light"] .farm-cadence.weekly {
-  color: #9a5a00;
-  border-color: #9a5a00;
-}
-
 /* ------------------------------------------------------------------ */
 /* HEADINGS (type)                                                     */
 /* ------------------------------------------------------------------ */
-html[data-type="serif"] :is(h1, .expansion-heading, .patch-heading, .farm-card-title, .source-heading, .view-tab),
-html[data-type="engraved"] :is(h1, .expansion-heading, .patch-heading, .farm-card-title, .source-heading, .view-tab) {
+html[data-type="serif"] :is(h1, .expansion-heading, .patch-heading, .source-heading, .view-tab, .quest-category-toggle),
+html[data-type="engraved"] :is(h1, .expansion-heading, .patch-heading, .source-heading, .view-tab, .quest-category-toggle) {
   font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 html[data-type="serif"] h1 {
@@ -210,7 +198,7 @@ html[data-type="serif"] .patch-heading {
   font-style: italic;
 }
 
-html[data-type="engraved"] :is(h1, .expansion-heading, .farm-card-title, .view-tab) {
+html[data-type="engraved"] :is(h1, .expansion-heading, .view-tab) {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 600;
@@ -227,10 +215,6 @@ html[data-type="engraved"] .patch-heading {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-}
-html[data-type="engraved"] .farm-card-title {
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
 }
 html[data-type="engraved"] .section-count {
   text-transform: none;
@@ -330,11 +314,11 @@ html[data-cards] .source-heading {
 }
 
 /* Framed corners: inner hairline plus gilded corner brackets. */
-html[data-cards="framed"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+html[data-cards="framed"] :is(.search-bar, .filter-bar, .source-card) {
   background-color: var(--panel);
   border-radius: 3px;
 }
-html[data-cards="framed"] :is(.source-card, .farm-card) {
+html[data-cards="framed"] .source-card {
   border-color: var(--line);
   outline: 1px solid var(--line-soft);
   outline-offset: -4px;
@@ -348,31 +332,31 @@ html[data-cards="framed"] :is(.source-card, .farm-card) {
   background-position: left 3px top 3px, left 3px top 3px, right 3px top 3px, right 3px top 3px,
     left 3px bottom 3px, left 3px bottom 3px, right 3px bottom 3px, right 3px bottom 3px;
 }
-html[data-cards="framed"] :is(.source-card, .farm-card) {
+html[data-cards="framed"] .source-card {
   padding: 0.75rem;
 }
 
 /* Plaque: gradient slab with a gilded top edge. */
-html[data-cards="plaque"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+html[data-cards="plaque"] :is(.search-bar, .filter-bar, .source-card) {
   border-radius: 4px;
   border-top: 2px solid var(--accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 }
-html[data-cards="plaque"] :is(.source-card, .farm-card) {
+html[data-cards="plaque"] .source-card {
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
 }
 
 /* Soft glow: rounded, hairline ring that lights up on hover. */
-html[data-cards="glow"] :is(.search-bar, .filter-bar, .source-card, .farm-card) {
+html[data-cards="glow"] :is(.search-bar, .filter-bar, .source-card) {
   border-color: transparent;
   border-radius: 12px;
   box-shadow: 0 0 0 1px var(--line), 0 6px 18px rgba(0, 0, 0, 0.22);
   transition: box-shadow 0.15s;
 }
-html[data-cards="glow"] :is(.source-card, .farm-card) {
+html[data-cards="glow"] .source-card {
   background: var(--panel);
 }
-html[data-cards="glow"] :is(.source-card, .farm-card):hover {
+html[data-cards="glow"] .source-card:hover {
   box-shadow: 0 0 0 1px var(--accent), 0 6px 22px rgba(0, 0, 0, 0.3);
 }
 
@@ -692,40 +676,152 @@ html .filter-bar .toggle.disabled {
   outline-offset: 2px;
 }
 
-/* Dailies "Done" (accent-filled) and "Undo" (outlined) buttons. */
-.farm-done-button {
-  padding: 0.3rem 0.9rem;
+/* ------------------------------------------------------------------ */
+/* QUEST LOG (all themes; layout in globals.css)                        */
+/* Both panes take their colours from the palette, so every theme      */
+/* restyles them; headings follow the theme's heading font.            */
+/* ------------------------------------------------------------------ */
+html .quest-log-frame {
+  border-color: var(--line);
+  border-top: 2px solid var(--accent);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+html .quest-list {
+  border-right-color: var(--line);
+  border-bottom-color: var(--line);
+  background: color-mix(in srgb, var(--panel-2) 55%, transparent);
+}
+.quest-category-toggle {
+  color: var(--heading, var(--foreground));
+}
+.quest-category-toggle:hover .quest-category-box {
+  opacity: 1;
+  border-color: var(--accent);
+}
+.quest-category-toggle:focus-visible,
+.quest-entry:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.quest-category-box {
+  color: var(--accent);
+}
+.quest-entry {
+  color: var(--accent);
+}
+.quest-entry:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.quest-entry[aria-current="true"] {
+  color: var(--foreground);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.quest-entry:is(.done, .collected) {
+  color: var(--foreground);
+}
+.quest-category.completed .quest-category-toggle {
+  opacity: 0.8;
+}
+
+/* Detail pane: the same panel slab as the theme's cards. */
+html .quest-detail {
+  color: var(--foreground);
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+}
+:is(.quest-title, .quest-section-heading) {
+  color: var(--heading, var(--foreground));
+}
+html[data-type="serif"] :is(.quest-title, .quest-section-heading),
+html[data-type="engraved"] :is(.quest-title, .quest-section-heading) {
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+html[data-type="engraved"] .quest-section-heading {
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.quest-title-status,
+.quest-reward-source,
+.quest-reset {
+  opacity: 0.75;
+}
+/* Cadence / unverified pills: tuned for dark backgrounds, darker on Light. */
+.quest-cadence.daily {
+  color: #5dade2;
+}
+.quest-cadence.weekly {
+  color: #f5b041;
+}
+.quest-unverified {
+  color: #e06666;
+}
+html[data-palette="light"] .quest-cadence.daily {
+  color: #1c6a9a;
+}
+html[data-palette="light"] .quest-cadence.weekly {
+  color: #9a5a00;
+}
+html[data-palette="light"] .quest-unverified {
+  color: #a52a2a;
+}
+.quest-section-heading {
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--line);
+}
+.quest-objectives li.met {
+  opacity: 0.7;
+}
+.quest-reward {
+  background: var(--panel-2);
+  border: 1px solid var(--line-soft);
+}
+.quest-detail-footer {
+  border-top: 1px solid var(--line);
+}
+/* A done quest keeps its text readable; only the rewards fade back. */
+.quest-detail.done .quest-rewards {
+  opacity: 0.7;
+}
+
+/* Quest Log "Done" (accent-filled) and "Undo" (outlined) buttons. */
+.quest-button {
+  min-width: 7rem;
+  padding: 0.4rem 1.1rem;
   border: 1px solid var(--accent);
   border-radius: 4px;
-  background: var(--accent);
-  color: var(--background);
-  font-size: 0.74rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2)),
+    var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: var(--on-owned);
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   transition: filter 0.12s;
 }
-.farm-done-button:hover:not(:disabled) {
+.quest-button:hover:not(:disabled) {
   filter: brightness(1.12);
 }
-.farm-done-button:active:not(:disabled) {
+.quest-button:active:not(:disabled) {
   transform: translateY(1px);
 }
-.farm-done-button:focus-visible {
+.quest-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.farm-done-button:disabled {
+.quest-button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-.farm-done-button.undo {
+.quest-button.undo {
   background: var(--panel-2);
   border-color: var(--line);
   color: var(--foreground);
 }
-.farm-done-button.undo:hover {
+.quest-button.undo:hover {
   filter: none;
   border-color: var(--accent);
 }

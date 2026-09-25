@@ -78,10 +78,13 @@ export async function GET(request) {
     // the usable count costs no extra Blizzard call.
     const usableIds = (data.mounts || []).filter((m) => m.is_useable).map((m) => m.mount.id);
 
-    // Used to hide the opposing faction's mounts in the grid. Best-effort -
-    // if this call fails for any reason, fall back to showing everything
-    // rather than failing the whole lookup over a non-essential field.
+    // Used to hide the opposing faction's mounts in the grid, and for the
+    // character's name as the game spells it ("Kurowastaken" however it was
+    // typed). Best-effort - if this call fails for any reason, fall back to
+    // showing everything rather than failing the whole lookup over
+    // non-essential fields.
     let faction = null;
+    let characterName = null;
     try {
       const profileRes = await blizzardFetch(
         `/profile/wow/character/${realmSlug}/${characterSlug}?namespace=profile-${region}&locale=${locale}`,
@@ -91,12 +94,13 @@ export async function GET(request) {
       if (profileRes.ok) {
         const profile = await profileRes.json();
         faction = profile.faction?.type?.toLowerCase() || null;
+        characterName = typeof profile.name === "string" ? profile.name : null;
       }
     } catch {
-      // ignore, faction stays null
+      // ignore, faction and name stay null
     }
 
-    return NextResponse.json({ ownedIds, usableIds, faction });
+    return NextResponse.json({ ownedIds, usableIds, faction, name: characterName });
   } catch {
     return NextResponse.json({ error: "Lookup failed, try again" }, { status: 500 });
   }

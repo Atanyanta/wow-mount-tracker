@@ -8,9 +8,9 @@ Scripts, raw results and screenshots referenced below are in [`docs/qa/`](qa/).
 | Area | Status | Checks |
 |---|---|---|
 | Data integrity, API, **realm list**, pure logic (Node) | Pass | 22 / 22 (+ 28 realm-library unit checks inside them) |
-| Full UI in **Chrome** - dev server | Pass | 69 / 69 (91 / 91 with the Node checks) |
+| Full UI in **Chrome** - dev server | Pass | 70 / 70 (92 / 92 with the Node checks) |
 | Full UI in **Chrome** - production build | Pass | 91 / 91 |
-| Full UI in **Firefox 156** - dev server | Pass | 48 / 48 |
+| Full UI in **Firefox 156** - dev server | Pass | 51 / 51 |
 | Full UI in **Firefox 156** - production build | Pass | 47 / 47 |
 | Memory / leak test (client, server) | No leak found | 4 measured cycles + server stress (run before the realm feature; the combobox holds no timers or global listeners) |
 | Security (secret exposure, input validation, `npm audit`) | Pass after 1 fix | 0 vulnerabilities |
@@ -43,25 +43,25 @@ Unexpected console errors or failed network requests across every run: **0**.
 |---|---|
 | **Load** (4) | Title/heading; Dark is the default with the shared look; the Customize panel is hidden; the unscanned catalog shows every mount neutrally (no owned/unowned state); Collected/Uncollected radios arrive disabled in the server HTML; the theme is already applied at DOMContentLoaded (no flash). |
 | **Search** (3) | Empty form gives a validation message; unknown character gives "not found" and stays unscanned; wrong region (EU) gives "not found". |
-| **Scan** (3) | Scan by pressing Enter: status text, and summary numbers (collected / total, %, usable, retired not counted, unobtainable owned) all equal the independently computed values; icon counts (owned, unowned, total = relevant mounts); opposing-faction unowned mounts hidden while cross-faction owned mounts stay visible; cache written and restored after reload. |
+| **Scan** (3) | Scan by pressing Enter with the realm and name typed in lower case: status text, the name shown as the game spells it ("Kurowastaken") and the realm by its proper name, and summary numbers (collected / total, %, usable, retired not counted, unobtainable owned) all equal the independently computed values; icon counts (owned, unowned, total = relevant mounts); opposing-faction unowned mounts hidden while cross-faction owned mounts stay visible; cache written and restored silently after reload (form filled in, no status message). |
 | **Progress** (1) | Every section's XP bar label sums to the summary totals; each bar's fill percentage matches its label. |
 | **Filters** (4) | Collected / Uncollected / All show exactly the right icons; section counts are unaffected by the filter (no "0 / n"); arrow keys move the radio selection; Show retired hides exactly the retired mounts. |
 | **Collapse** (4) | Section toggle unmounts content and sets `aria-expanded`; the bar stays visible when collapsed; Enter and Space work; Collapse all / Expand all; state persists across a reload; Collapse all acts only on what is on screen. |
 | **Icons** (4) | All links are Wowhead, `target=_blank`, `rel=noreferrer`; hover tooltip content, "Collected" line, on-screen position; **right-most icon's tooltip stays inside the viewport**; every image loads after scrolling the entire page (no broken icons, no 404s). |
 | **Themes** (3) | All six chips apply their palette, persist across reload and are applied before hydration; WCAG contrast (4.5:1 body text, 3:1 headings) passes in every theme; bad saved values (old "parchment", invalid JSON, hidden overrides) fall back safely. |
-| **Dailies** (4) | Summary, reset countdowns, cards; missing mounts are **not** dimmed there; "Include collected" adds owned rows; Done checkbox persists per character, decrements "left this reset", hides with Hide completed, survives reload, and **auto-expires when the stored period is one behind** (simulated reset). |
+| **Quest Log** (5) | Summary, reset countdowns, quest list with the first quest selected and its details (objectives, rewards, reset countdown, Done); reward mounts are **not** dimmed; clicking a quest moves the selection and the details; a category collapses, stays collapsed after reload, and Expand all / Collapse all work without touching the Collection's collapse state; "Include collected" adds fully-collected quests (marked) whose rewards say Collected; Done moves the quest to "Completed this reset" (still selected, "(Complete)", objectives 1/1, "Back in", Undo), decrements "left this reset", is hidden by Hide completed (and then Done moves the selection to the next quest), Undo returns it to its place, survives reload, and **auto-expires when the stored period is one behind** (simulated reset). |
 | **Accessibility** (1) | tablist/tab roles, radiogroup label, `role=switch`, no unlabelled buttons, no images without `alt`, `aria-expanded` on toggles, single `h1`, `lang=en`. |
-| **Responsive** (3) | 320, 390 and 768 px: nothing extends past the viewport in Collection or Dailies; theme switcher visible. |
+| **Responsive** (3) | 320, 390 and 768 px: nothing extends past the viewport in Collection or the Quest Log; the quest details stack under the list at 760 px and below and sit beside it above that; theme switcher visible. |
 | **Perf** (1) | Load timing and element count recorded. |
 | **Failures** (9) | With a scan loaded, a Blizzard 429, 500, 502, dropped connection, or non-JSON reply each show a clear message, **keep the previous results**, and the button recovers (not stuck on "Scanning..."); a normal rescan then succeeds; a 404 from a scanned state **clears** the old results and disables the filters again; a rapid double-click on Scan sends exactly one request; HTML typed into the name field renders as text and runs nothing. |
-| **Storage blocked** (1) | With `localStorage` throwing a SecurityError: page loads, scan works, theme switching, collapsing and Dailies "Done" all work for the session, no errors. |
-| **Keyboard** (1) | Tab order is Collection > Dailies > 6 theme chips > region > realm > name > Rescan > filter radios > Show retired > Expand all > Collapse all > section headings > icons; every stop has a visible focus indicator. |
+| **Storage blocked** (1) | With `localStorage` throwing a SecurityError: page loads, scan works, theme switching, collapsing (Collection and Quest Log) and Quest Log "Done" all work for the session, no errors. |
+| **Keyboard** (1) | Tab order is Collection > Quest Log > 6 theme chips > region > realm > name > Rescan > filter radios > Show retired > Expand all > Collapse all > section headings > icons; every stop has a visible focus indicator. |
 | **Wide screens** (3) | 1920, 2560 and 3440 px: content stays centred at its max width, no overflow, tooltip flip still correct. |
 | **Misc** (3) | No duplicate element ids; `aria-controls` targets exist; a theme/collapse change made in another tab (storage event) updates this tab; 25 rapid theme + collapse clicks leave state consistent. |
 
 ### 3.3 Firefox-specific (36 checks, plus 11 realm checks in 3.5)
 
-Ran the scan-then-reload scenario four times (once after changing a filter, since Firefox restores that too), plus: catalog and filters, Show retired toggle, Collapse all and its persistence, all six themes and persistence before hydration, CSS features the design relies on (`color-mix`, `:has()`, `inset`, gradient `border-image`), a real pointer-move tooltip, and Dailies including "Done" persisting across reload. Screenshots of the Firefox rendering are in `qa/screenshots/`.
+Ran the scan-then-reload scenario four times (once after changing a filter, since Firefox restores that too), plus: catalog and filters, Show retired toggle, Collapse all and its persistence, all six themes and persistence before hydration, CSS features the design relies on (`color-mix`, `:has()`, `inset`, gradient `border-image`), a real pointer-move tooltip, and the Quest Log (list + details, selecting a quest, collapsing a category, "Done" persisting across reload with no hydration error, Undo). Screenshots of the Firefox rendering are in `qa/screenshots/`.
 
 ### 3.4 Other checks
 
@@ -109,6 +109,8 @@ The realm field used to be free text, so a typo or a differently punctuated real
 | 16 | Firefox / Chrome vs **production** | **47 / 47** and **91 / 91** | |
 | 17 | 2026-09-24, Dailies Done button + Completed section (dev) | **91 / 91** and **48 / 48** | Checkbox replaced by Done/Undo buttons; Dailies test rewritten (card moves to Completed and back, Undo, hide, reload, reset expiry); Firefox gained an Undo check. |
 | 18 | 2026-09-25, after upgrading to Next.js 16.3.6 / React 19.3.0 (dev; `npm run build` and lint also clean) | **91 / 91** and **48 / 48** | No regressions. The Firefox run removed its throwaway profile (an earlier interrupted run had left one behind, which is now git-ignored). |
+| 19 | 2026-09-25, Dailies tab rebuilt as the **Quest Log** (dev) | **92 / 92** and **50 / 50** | Dailies tests rewritten for the list + detail layout (selection, category collapse and persistence, Completed category, Hide completed moving the selection); responsive check now also asserts the stacked layout. First run 91 / 92: one assertion of mine assumed the Collection collapse key was empty, but earlier tests legitimately leave `[]` there - now compared with its value before the Quest Log clicks. Leak test (3 cycles, now also selecting/collapsing quests): nodes and listeners constant, heap flat - no leak. |
+| 20 | 2026-09-25, Quest Log follows the theme; curation notes removed; silent cache restore + capitalised name; scrollbar-gutter fix (dev) | **92 / 92** and **51 / 51** | Tests updated for the silent restore (the "Showing cached collection" message is gone) and a lower-case scan that must come back as "Kurowastaken". A sideways-shift check first added to the Chrome suite passed even with the fix removed (headless Chrome never showed the shift), so it was dropped there and added to the Firefox suite, which reproduces the bug (5.10). Screenshots checked in Dark, Light, Alliance (done state) and Void. |
 
 ## 5. Bugs found and fixed
 
@@ -128,6 +130,7 @@ Found while building and testing the realm type-ahead:
 | 5.7 | Medium (real characters unreachable) | Some realms could never be looked up: e.g. **Azjol-Nerub**, whose real Blizzard slug is `azjolnerub` (hyphen dropped), or Aggra (Português) | The app guessed the API slug from the typed name (`"Azjol-Nerub"` -> `azjol-nerub`), which does not match Blizzard's slugs. | The realm list stores Blizzard's real slug; the search bar and the API both resolve names to it. | Node + browser: the request carries `realm=azjolnerub`; API accepts the realm by name. |
 | 5.8 | Low (UX) | An error such as *"Tichondrus isn't a US realm"* stayed on screen after the user fixed the field or changed region | The status message was only cleared on the next submit. | Editing region, realm or name clears an error (info messages stay). | Screenshots before/after; test "editing clears the error". |
 | 5.9 | Medium (UX) | After picking a realm, clicking the still-focused field did not reopen the list | The list opened only on focus, and the field keeps focus after a pick. | Also open on click (`onClick`). | Caught by the test "clicking an option picks it... exact realm then shows the whole list"; passes in Chrome and Firefox. |
+| 5.10 | Low (UX) | Page content jumped sideways (~8 px) on Collapse all / Expand all (reported by you) | Collapsing made the page shorter than the window, so the scrollbar disappeared and the centred content re-centred in the wider space. Headless Chrome never showed it; Firefox did (8.5 px at 2560 px wide). | `scrollbar-gutter: stable` on `html` keeps the scrollbar's space reserved. | Firefox A/B: 8.5 px shift without the rule, 0 px with it; now a check in `ff.mjs`. |
 
 (Earlier sessions also fixed: cross-faction owned mounts being hidden from the grid, the search bar ignoring Enter, and a localStorage exception that could swallow a successful scan.)
 
@@ -195,8 +198,8 @@ Scripts live in `docs/qa/` and use absolute paths for this machine (`ROOT` at th
 
 ```
 npm run dev                                # server on :3000
-node docs/qa/qa.mjs                        # Node + Chrome suite (91 checks; runs realms-unit.mjs too)
-node docs/qa/ff.mjs                        # Firefox suite (48 checks)
+node docs/qa/qa.mjs                        # Node + Chrome suite (92 checks; runs realms-unit.mjs too)
+node docs/qa/ff.mjs                        # Firefox suite (51 checks)
 node docs/qa/realms-unit.mjs               # realm lookup/search library on its own (28 checks)
 node docs/qa/leak.mjs 4                    # client memory-leak test, 4 measured cycles
 npm run build:realms                       # refresh data/realms.json from Blizzard (needs .env.local)
