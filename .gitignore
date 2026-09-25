@@ -39,6 +39,10 @@ yarn-error.log*
 # build script HTML cache (regenerate via npm run build:mounts)
 /.cache
 
+# throwaway Firefox profiles from docs/qa/ff.mjs (normally deleted at the end
+# of a run; left behind if the run is killed)
+/docs/qa/ffprofile-*/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
