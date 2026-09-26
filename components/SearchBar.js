@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { findRealm, getRealms, suggestRealms } from "@/lib/realms";
 import RealmCombobox from "./RealmCombobox";
 
@@ -32,11 +32,11 @@ function readCache(query) {
   }
 }
 
-function writeCache(query, ownedIds, usableIds, faction) {
+function writeCache(query, { ownedIds, usableIds, faction, avatar }) {
   try {
     localStorage.setItem(
       cacheKey(query),
-      JSON.stringify({ ownedIds, usableIds, faction, fetchedAt: Date.now() })
+      JSON.stringify({ ownedIds, usableIds, faction, avatar, fetchedAt: Date.now() })
     );
     localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify(query));
   } catch {
@@ -45,13 +45,35 @@ function writeCache(query, ownedIds, usableIds, faction) {
   }
 }
 
+// The search area has two modes. With no character loaded it is the search
+// form (region / realm / name / Scan). Once a character is loaded it collapses
+// to Rescan + "Scan another character" on the left and the character's
+// portrait and Name-Realm on the right; "Scan another character" reopens the
+// form (with Cancel to go back) without clearing what's on screen.
 export default function SearchBar({ onScanResult }) {
   const [region, setRegion] = useState("us");
   const [realm, setRealm] = useState("");
   const [name, setName] = useState("");
-  const [status, setStatus] = useState(null); // { type: "error" | "info", text }
+  const [error, setError] = useState(null);
+  // Screen-reader-only confirmation of a finished scan (there is no visible
+  // "loaded" message; the name plate appearing is the visual cue).
+  const [announcement, setAnnouncement] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lastFetchedAt, setLastFetchedAt] = useState(null);
+  // The character whose collection is on screen:
+  // { region, realm (slug), realmName, name, avatar } - or null.
+  const [current, setCurrent] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const nameInputRef = useRef(null);
+  const anotherButtonRef = useRef(null);
+  const focusNext = useRef(null); // "name" | "another", applied after the mode switch renders
+
+  const showForm = !current || editing;
+
+  useEffect(() => {
+    if (focusNext.current === "name") nameInputRef.current?.focus();
+    if (focusNext.current === "another") anotherButtonRef.current?.focus();
+    focusNext.current = null;
+  }, [showForm]);
 
   useEffect(() => {
     try {
@@ -64,13 +86,14 @@ export default function SearchBar({ onScanResult }) {
       const lastRealm = findRealm(lastRegion, last.realm || "");
       const realmName = lastRealm?.name ?? (last.realm || "");
       const realmSlug = lastRealm?.slug ?? (last.realm || "");
+      const lastName = formatCharacterName(last.name || "");
       // One-time hydration from localStorage (an external system, per React's
       // own guidance on effects) - not state that could be derived at render
       // time, since it doesn't exist during server rendering.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegion(lastRegion);
       setRealm(realmName);
-      setName(formatCharacterName(last.name || ""));
+      setName(lastName);
       const cached =
         readCache({ region: lastRegion, realm: realmSlug, name: last.name || "" }) ??
         readCache({ region: lastRegion, realm: last.realm || "", name: last.name || "" });
@@ -84,9 +107,9 @@ export default function SearchBar({ onScanResult }) {
           faction: cached.faction ?? null,
           character: { region: lastRegion, realm: realmSlug, name: last.name || "" },
         });
-        // Restored silently: the filled-in form and the "Rescan" button already
-        // say whose collection this is.
-        setLastFetchedAt(cached.fetchedAt);
+        // Restored silently. Scans cached before portraits existed have no
+        // avatar; the plate shows an initial until the next rescan.
+        setCurrent({ region: lastRegion, realm: realmSlug, realmName, name: lastName, avatar: cached.avatar ?? null });
       }
     } catch {
       // ignore malformed localStorage state
@@ -94,9 +117,9 @@ export default function SearchBar({ onScanResult }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // An error message is about the text that was in the form when it appeared, so
-  // it goes away as soon as the user edits the form (info messages stay).
-  const clearError = () => setStatus((s) => (s?.type === "error" ? null : s));
+  // An error message is about the text that was in the form when it appeared,
+  // so it goes away as soon as the user edits the form.
+  const clearError = () => setError(null);
 
   // A realm exists in one region, so switching region drops a realm that isn't
   // in the new region's list instead of leaving a mismatched pair in the form.
@@ -106,29 +129,27 @@ export default function SearchBar({ onScanResult }) {
     if (realm.trim() && getRealms(next).length > 0 && !findRealm(next, realm)) setRealm("");
   }
 
-  async function runScan(e) {
-    e?.preventDefault();
-    if (!realm.trim() || !name.trim()) {
-      setStatus({ type: "error", text: "Enter a character name and realm." });
+  async function scan(target) {
+    if (!target.realm.trim() || !target.name.trim()) {
+      setError("Enter a character name and realm.");
       return;
     }
     // Only real realms go to the API. (If a region has no list at all, fall back
     // to free text rather than blocking the search.)
-    const realmMatch = findRealm(region, realm);
-    if (!realmMatch && getRealms(region).length > 0) {
-      const tips = suggestRealms(region, realm);
-      setStatus({
-        type: "error",
-        text:
-          `"${realm.trim()}" isn't a ${region.toUpperCase()} realm - pick one from the list.` +
-          (tips.length ? ` Did you mean ${tips.map((t) => t.name).join(", ")}?` : ""),
-      });
+    const realmMatch = findRealm(target.region, target.realm);
+    if (!realmMatch && getRealms(target.region).length > 0) {
+      const tips = suggestRealms(target.region, target.realm);
+      setError(
+        `"${target.realm.trim()}" isn't a ${target.region.toUpperCase()} realm - pick one from the list.` +
+          (tips.length ? ` Did you mean ${tips.map((t) => t.name).join(", ")}?` : "")
+      );
       return;
     }
-    const query = { region, realm: realmMatch?.slug ?? realm.trim(), name: name.trim() };
-    const realmLabel = realmMatch?.name ?? realm.trim();
+    const query = { region: target.region, realm: realmMatch?.slug ?? target.realm.trim(), name: target.name.trim() };
+    const realmLabel = realmMatch?.name ?? target.realm.trim();
     setLoading(true);
-    setStatus(null);
+    setError(null);
+    setAnnouncement("");
     try {
       const params = new URLSearchParams(query);
       const res = await fetch(`/api/collections?${params.toString()}`);
@@ -136,20 +157,22 @@ export default function SearchBar({ onScanResult }) {
       if (!res.ok) {
         // A 404 means the searched character doesn't exist, so whatever is
         // still on screen belongs to a *different* character than the one in
-        // the search box - clear it rather than leave misleading results.
-        // Transient failures (rate limit, 5xx) keep the previous results,
-        // which the status line labels by character.
+        // the search box - clear it rather than leave misleading results (the
+        // form, still filled in, shows the error). Transient failures (rate
+        // limit, 5xx) keep the previous results and the current mode.
         if (res.status === 404) {
           onScanResult(null);
-          setLastFetchedAt(null);
+          setCurrent(null);
+          setEditing(false);
         }
-        setStatus({ type: "error", text: data.error || "Lookup failed" });
+        setError(data.error || "Lookup failed");
         return;
       }
       // Show and save the name as the game spells it, whatever was typed. (The
       // cache and "done" keys are lower-cased, so this doesn't change them.)
       const saved = { ...query, name: data.name || formatCharacterName(query.name) };
-      writeCache(saved, data.ownedIds, data.usableIds, data.faction);
+      const avatar = data.avatar ?? null;
+      writeCache(saved, { ...data, avatar });
       onScanResult({
         ownedIds: new Set(data.ownedIds),
         usableIds: data.usableIds ? new Set(data.usableIds) : null,
@@ -158,53 +181,136 @@ export default function SearchBar({ onScanResult }) {
       });
       setName(saved.name);
       setRealm(realmLabel);
-      const now = Date.now();
-      setLastFetchedAt(now);
-      setStatus({
-        type: "info",
-        text: `Loaded ${data.ownedIds.length} owned mounts for ${saved.name} (${realmLabel}) just now.`,
-      });
+      setCurrent({ region: saved.region, realm: saved.realm, realmName: realmLabel, name: saved.name, avatar });
+      setEditing(false);
+      setAnnouncement(`Loaded ${data.ownedIds.length} owned mounts for ${saved.name} (${realmLabel}).`);
     } catch {
-      setStatus({ type: "error", text: "Network error, try again." });
+      setError("Network error, try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  function submitForm(e) {
+    e.preventDefault();
+    scan({ region, realm, name });
+  }
+
+  function rescan(e) {
+    e.preventDefault();
+    // Put the character back in the form first, so that if it no longer
+    // exists (404) the form reappears filled in, ready to correct.
+    setRegion(current.region);
+    setRealm(current.realmName);
+    setName(current.name);
+    scan({ region: current.region, realm: current.realm, name: current.name });
+  }
+
+  function scanAnother() {
+    // Alts are often on the same realm, so keep region + realm.
+    setRegion(current.region);
+    setRealm(current.realmName);
+    setName("");
+    setError(null);
+    focusNext.current = "name";
+    setEditing(true);
+  }
+
+  function cancelScanAnother() {
+    setError(null);
+    focusNext.current = "another";
+    setEditing(false);
+  }
+
+  const errorLine = error ? <span className="search-status error">{error}</span> : null;
+
   return (
-    <form className="search-bar" onSubmit={runScan}>
-      <select value={region} onChange={(e) => changeRegion(e.target.value)} aria-label="Region">
-        {REGIONS.map((r) => (
-          <option key={r} value={r}>
-            {r.toUpperCase()}
-          </option>
-        ))}
-      </select>
-      <RealmCombobox
-        region={region}
-        value={realm}
-        onChange={(text) => {
-          clearError();
-          setRealm(text);
-        }}
-      />
-      <input
-        placeholder="Character name"
-        aria-label="Character name"
-        value={name}
-        onChange={(e) => {
-          clearError();
-          setName(e.target.value);
-        }}
-      />
-      <button type="submit" disabled={loading}>
-        {loading ? "Scanning..." : lastFetchedAt ? "Rescan" : "Scan"}
-      </button>
-      {status ? (
-        <span className={`search-status${status.type === "error" ? " error" : ""}`}>
-          {status.text}
+    <>
+      <span className="sr-only search-announcement" role="status" aria-live="polite">
+        {announcement}
+      </span>
+      {showForm ? (
+        <form className="search-bar" onSubmit={submitForm}>
+          <select value={region} onChange={(e) => changeRegion(e.target.value)} aria-label="Region">
+            {REGIONS.map((r) => (
+              <option key={r} value={r}>
+                {r.toUpperCase()}
+              </option>
+            ))}
+          </select>
+          <RealmCombobox
+            region={region}
+            value={realm}
+            onChange={(text) => {
+              clearError();
+              setRealm(text);
+            }}
+          />
+          <input
+            ref={nameInputRef}
+            placeholder="Character name"
+            aria-label="Character name"
+            value={name}
+            onChange={(e) => {
+              clearError();
+              setName(e.target.value);
+            }}
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? "Scanning..." : "Scan"}
+          </button>
+          {current ? (
+            <button type="button" className="search-cancel" onClick={cancelScanAnother} disabled={loading}>
+              Cancel
+            </button>
+          ) : null}
+          {errorLine}
+        </form>
+      ) : (
+        <form className="search-bar scanned" onSubmit={rescan}>
+          <div className="search-actions">
+            <button type="submit" disabled={loading}>
+              {loading ? "Scanning..." : "Rescan"}
+            </button>
+            <button type="button" ref={anotherButtonRef} onClick={scanAnother} disabled={loading}>
+              Scan another character
+            </button>
+          </div>
+          <CharacterPlate character={current} />
+          {errorLine}
+        </form>
+      )}
+    </>
+  );
+}
+
+// "Name-Realm" as the game writes it (realm without spaces: "Name-Area52"),
+// with the character's portrait. Falls back to the name's initial when there
+// is no portrait yet (older cached scan) or the image fails to load.
+function CharacterPlate({ character }) {
+  const [failedSrc, setFailedSrc] = useState(null);
+  const { name, realmName, avatar } = character;
+  const showImage = avatar && failedSrc !== avatar;
+  return (
+    <div className="character-plate">
+      <span className="character-name">
+        {name}
+        <span className="character-realm">-{realmName.replace(/\s+/g, "")}</span>
+      </span>
+      {showImage ? (
+        <img
+          className="character-portrait"
+          src={avatar}
+          alt=""
+          width={56}
+          height={56}
+          onError={() => setFailedSrc(avatar)}
+        />
+      ) : (
+        <span className="character-portrait placeholder" aria-hidden="true">
+          {name.charAt(0)}
         </span>
-      ) : null}
-    </form>
+      )}
+    </div>
   );
 }

@@ -246,6 +246,21 @@
       "ok": true
     },
     {
+      "group": "plate",
+      "name": "scanned: fields collapse to Rescan + Scan another; Name-Realm + Blizzard portrait on the right",
+      "ok": true
+    },
+    {
+      "group": "plate",
+      "name": "'Scan another character' opens the form (realm kept, name focused) without clearing results; Cancel goes back",
+      "ok": true
+    },
+    {
+      "group": "plate",
+      "name": "Rescan of a character that no longer exists (404) reopens the form filled in, with the error",
+      "ok": true
+    },
+    {
       "group": "progress",
       "name": "section bars: labels sum to the summary; bars/labels agree",
       "ok": true

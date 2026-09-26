@@ -34,7 +34,15 @@ ws.onmessage = (e) => {
   if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); return; }
   if (m.method === "log.entryAdded") logs.push({ level: m.params.level, type: m.params.type, text: String(m.params.text ?? "").slice(0, 400) });
 };
-const send = (method, params = {}) => new Promise((res) => { const i = ++id; pending.set(i, res); ws.send(JSON.stringify({ id: i, method, params })); });
+// Every command gets a time limit: a run once hung silently for 10+ minutes
+// (cause not found), so a stuck command now fails loudly instead.
+const SEND_TIMEOUT_MS = 60000;
+const send = (method, params = {}) => new Promise((res, rej) => {
+  const i = ++id;
+  const timer = setTimeout(() => { pending.delete(i); rej(new Error(`${method} got no reply in ${SEND_TIMEOUT_MS / 1000}s`)); }, SEND_TIMEOUT_MS);
+  pending.set(i, (m) => { clearTimeout(timer); res(m); });
+  ws.send(JSON.stringify({ id: i, method, params }));
+});
 const must = async (method, params) => { const r = await send(method, params); if (r.type === "error") throw new Error(`${method}: ${r.error} ${r.message}`); return r.result; };
 
 const session = await must("session.new", { capabilities: { alwaysMatch: {} } });
@@ -76,7 +84,7 @@ const fill = (sel, v) => ev(`(()=>{const i=document.querySelector(${JSON.stringi
 await fill('.search-bar input[placeholder="Realm"]', "Tichondrius");
 await fill('.search-bar input[placeholder="Character name"]', "Kurowastaken");
 await must("input.performActions", { context: ctx, actions: [{ type: "key", id: "kb", actions: [{ type: "keyDown", value: "\uE007" }, { type: "keyUp", value: "\uE007" }] }] });
-for (let i = 0; i < 40; i++) { await sleep(300); if (/^Loaded \d+ owned/.test((await ev("document.querySelector('.search-status')?.textContent ?? ''")))) break; }
+for (let i = 0; i < 40; i++) { await sleep(300); if (/^Loaded \d+ owned/.test((await ev("document.querySelector('.search-announcement')?.textContent ?? ''")))) break; }
 const summary = await ev("document.querySelector('.collection-summary').textContent");
 check("scan completes; summary shows collected/total", /\d+ \/ \d+ mounts collected/.test(summary), summary.slice(0, 70));
 check("Collected/Uncollected enabled after scan", (await ev("[...document.querySelectorAll('.segment-input')].every(i=>!i.disabled)")) === true);
@@ -90,7 +98,7 @@ for (let n = 1; n <= 4; n++) {
   console.log(`   reload #${n}${n === 3 ? " (after clicking 'Collected')" : ""}: DOM radios before hydration = ${JSON.stringify(pre.radios)} ${restored ? "<- Firefox altered the server HTML" : "(matches server HTML)"}; after = ${JSON.stringify(now)}`);
   showHydration(`reload #${n}`);
   check(`reload #${n}: zero hydration errors`, hydrationErrors() === 0, hydrationErrors() ? logs.filter((l) => /hydrat/i.test(l.text))[0].text.slice(0, 120) : "");
-  check(`reload #${n}: cached scan restored silently + filter radios enabled`, (await ev("document.querySelectorAll('.mount-icon-link.owned').length")) > 0 && (await ev("!!document.querySelector('.search-status')")) === false && (await ev("document.querySelector('.search-bar input[placeholder=\"Character name\"]').value")) === "Kurowastaken" && (await ev("[...document.querySelectorAll('.segment-input')].every(i=>!i.disabled)")) === true);
+  check(`reload #${n}: cached scan restored silently + filter radios enabled`, (await ev("document.querySelectorAll('.mount-icon-link.owned').length")) > 0 && (await ev("!!document.querySelector('.search-status')")) === false && (await ev("document.querySelector('.character-plate')?.textContent")) === "Kurowastaken-Tichondrius" && (await ev("[...document.querySelectorAll('.segment-input')].every(i=>!i.disabled)")) === true);
   const other = problems().filter((p) => !/hydrat/i.test(p));
   check(`reload #${n}: no other console errors`, other.length === 0, other.join(" || "));
 }
@@ -186,8 +194,10 @@ const press = (k) => must("input.performActions", { context: ctx, actions: [{ ty
 const KEY = { Down: "\uE015", Enter: "\uE007", Esc: "\uE00C", Tab: "\uE004" };
 const setRegionFF = (r) => ev(`(()=>{const s=document.querySelector('.search-bar select'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,${JSON.stringify(r)}); s.dispatchEvent(new Event('change',{bubbles:true}))})()`);
 
-await nav(); // cached scan from section 2 is restored
-check("realm text restored after a Firefox reload, no hydration error", (await combo()).value === "Tichondrius" && hydrationErrors() === 0, JSON.stringify((await combo()).value));
+await nav(); // cached scan from section 2 is restored: the search area shows the character, not the form
+check("scanned character restored after a Firefox reload (Name-Realm + portrait), no hydration error", (await ev("document.querySelector('.character-plate')?.textContent")) === "Kurowastaken-Tichondrius" && (await ev("document.querySelector('.character-portrait')?.tagName")) === "IMG" && hydrationErrors() === 0, JSON.stringify(await ev("document.querySelector('.character-plate')?.textContent")));
+await clickText(".search-bar button", "Scan another character"); await sleep(300);
+check("'Scan another character' opens the form with the realm kept", (await combo()).value === "Tichondrius" && (await ev("document.querySelector('.search-bar input[placeholder=\"Character name\"]').value")) === "");
 // A script-called .focus() does not dispatch focus events in an unfocused headless window, so click the field like a user would.
 await ev(`document.querySelector('.realm-combobox input').click()`); await sleep(200);
 let s = await combo();

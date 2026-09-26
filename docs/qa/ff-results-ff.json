@@ -195,9 +195,14 @@
     "detail": ""
   },
   {
-    "name": "realm text restored after a Firefox reload, no hydration error",
+    "name": "scanned character restored after a Firefox reload (Name-Realm + portrait), no hydration error",
     "ok": true,
-    "detail": "\"Tichondrius\""
+    "detail": "\"Kurowastaken-Tichondrius\""
+  },
+  {
+    "name": "'Scan another character' opens the form with the realm kept",
+    "ok": true,
+    "detail": ""
   },
   {
     "name": "clicking the field opens the whole US realm list",

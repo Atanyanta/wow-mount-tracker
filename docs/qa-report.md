@@ -8,9 +8,9 @@ Scripts, raw results and screenshots referenced below are in [`docs/qa/`](qa/).
 | Area | Status | Checks |
 |---|---|---|
 | Data integrity, API, **realm list**, pure logic (Node) | Pass | 22 / 22 (+ 28 realm-library unit checks inside them) |
-| Full UI in **Chrome** - dev server | Pass | 70 / 70 (92 / 92 with the Node checks) |
+| Full UI in **Chrome** - dev server | Pass | 73 / 73 (95 / 95 with the Node checks) |
 | Full UI in **Chrome** - production build | Pass | 91 / 91 |
-| Full UI in **Firefox 156** - dev server | Pass | 51 / 51 |
+| Full UI in **Firefox 156** - dev server | Pass | 52 / 52 |
 | Full UI in **Firefox 156** - production build | Pass | 47 / 47 |
 | Memory / leak test (client, server) | No leak found | 4 measured cycles + server stress (run before the realm feature; the combobox holds no timers or global listeners) |
 | Security (secret exposure, input validation, `npm audit`) | Pass after 1 fix | 0 vulnerabilities |
@@ -55,7 +55,7 @@ Unexpected console errors or failed network requests across every run: **0**.
 | **Perf** (1) | Load timing and element count recorded. |
 | **Failures** (9) | With a scan loaded, a Blizzard 429, 500, 502, dropped connection, or non-JSON reply each show a clear message, **keep the previous results**, and the button recovers (not stuck on "Scanning..."); a normal rescan then succeeds; a 404 from a scanned state **clears** the old results and disables the filters again; a rapid double-click on Scan sends exactly one request; HTML typed into the name field renders as text and runs nothing. |
 | **Storage blocked** (1) | With `localStorage` throwing a SecurityError: page loads, scan works, theme switching, collapsing (Collection and Quest Log) and Quest Log "Done" all work for the session, no errors. |
-| **Keyboard** (1) | Tab order is Collection > Quest Log > 6 theme chips > region > realm > name > Rescan > filter radios > Show retired > Expand all > Collapse all > section headings > icons; every stop has a visible focus indicator. |
+| **Keyboard** (1) | Tab order (character loaded) is Collection > Quest Log > 6 theme chips > Rescan > Scan another character > filter radios > Show retired > Expand all > Collapse all > section headings > icons; every stop has a visible focus indicator. |
 | **Wide screens** (3) | 1920, 2560 and 3440 px: content stays centred at its max width, no overflow, tooltip flip still correct. |
 | **Misc** (3) | No duplicate element ids; `aria-controls` targets exist; a theme/collapse change made in another tab (storage event) updates this tab; 25 rapid theme + collapse clicks leave state consistent. |
 
@@ -111,6 +111,7 @@ The realm field used to be free text, so a typo or a differently punctuated real
 | 18 | 2026-09-25, after upgrading to Next.js 16.3.6 / React 19.3.0 (dev; `npm run build` and lint also clean) | **91 / 91** and **48 / 48** | No regressions. The Firefox run removed its throwaway profile (an earlier interrupted run had left one behind, which is now git-ignored). |
 | 19 | 2026-09-25, Dailies tab rebuilt as the **Quest Log** (dev) | **92 / 92** and **50 / 50** | Dailies tests rewritten for the list + detail layout (selection, category collapse and persistence, Completed category, Hide completed moving the selection); responsive check now also asserts the stacked layout. First run 91 / 92: one assertion of mine assumed the Collection collapse key was empty, but earlier tests legitimately leave `[]` there - now compared with its value before the Quest Log clicks. Leak test (3 cycles, now also selecting/collapsing quests): nodes and listeners constant, heap flat - no leak. |
 | 20 | 2026-09-25, Quest Log follows the theme; curation notes removed; silent cache restore + capitalised name; scrollbar-gutter fix (dev) | **92 / 92** and **51 / 51** | Tests updated for the silent restore (the "Showing cached collection" message is gone) and a lower-case scan that must come back as "Kurowastaken". A sideways-shift check first added to the Chrome suite passed even with the fix removed (headless Chrome never showed the shift), so it was dropped there and added to the Firefox suite, which reproduces the bug (5.10). Screenshots checked in Dark, Light, Alliance (done state) and Void. |
+| 21 | 2026-09-25, search area collapses once a character is loaded (Rescan / Scan another character + portrait and Name-Realm); no visible success message (dev) | **95 / 95** and **52 / 52** | New "plate" tests (layout, Blizzard portrait loads, Scan another + Cancel with focus handling, 404 on rescan reopens the filled form). First run 61 / 95: my plate assertions read the whole plate, which also holds the portrait's placeholder initial; one early failure left the page in the wrong state and cascaded. After reading `.character-name`: all pass. One Firefox run hung silently for 10+ minutes (cause not identified; the rerun passed) - `ff.mjs` now gives every browser command a 60 s limit so a hang fails loudly. Leak test: no leak. |
 
 ## 5. Bugs found and fixed
 
@@ -198,8 +199,8 @@ Scripts live in `docs/qa/` and use absolute paths for this machine (`ROOT` at th
 
 ```
 npm run dev                                # server on :3000
-node docs/qa/qa.mjs                        # Node + Chrome suite (92 checks; runs realms-unit.mjs too)
-node docs/qa/ff.mjs                        # Firefox suite (51 checks)
+node docs/qa/qa.mjs                        # Node + Chrome suite (95 checks; runs realms-unit.mjs too)
+node docs/qa/ff.mjs                        # Firefox suite (52 checks)
 node docs/qa/realms-unit.mjs               # realm lookup/search library on its own (28 checks)
 node docs/qa/leak.mjs 4                    # client memory-leak test, 4 measured cycles
 npm run build:realms                       # refresh data/realms.json from Blizzard (needs .env.local)

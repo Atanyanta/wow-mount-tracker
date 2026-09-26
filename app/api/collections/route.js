@@ -78,29 +78,33 @@ export async function GET(request) {
     // the usable count costs no extra Blizzard call.
     const usableIds = (data.mounts || []).filter((m) => m.is_useable).map((m) => m.mount.id);
 
-    // Used to hide the opposing faction's mounts in the grid, and for the
-    // character's name as the game spells it ("Kurowastaken" however it was
-    // typed). Best-effort - if this call fails for any reason, fall back to
-    // showing everything rather than failing the whole lookup over
-    // non-essential fields.
-    let faction = null;
-    let characterName = null;
-    try {
-      const profileRes = await blizzardFetch(
-        `/profile/wow/character/${realmSlug}/${characterSlug}?namespace=profile-${region}&locale=${locale}`,
-        token,
-        { region }
-      );
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        faction = profile.faction?.type?.toLowerCase() || null;
-        characterName = typeof profile.name === "string" ? profile.name : null;
-      }
-    } catch {
-      // ignore, faction and name stay null
-    }
+    // Two best-effort extras, fetched in parallel. If either call fails for any
+    // reason, its fields stay null rather than failing the whole lookup:
+    // - the profile: faction (hides the opposing faction's mounts in the grid)
+    //   and the name as the game spells it ("Kurowastaken" however it was typed)
+    // - character media: the small face portrait shown beside the name. Its URL
+    //   changes when Blizzard re-renders the character, so it's re-read on
+    //   every scan rather than stored once.
+    const characterPath = `/profile/wow/character/${realmSlug}/${characterSlug}`;
+    const query = `?namespace=profile-${region}&locale=${locale}`;
+    const [profile, media] = await Promise.all(
+      [`${characterPath}${query}`, `${characterPath}/character-media${query}`].map(async (path) => {
+        try {
+          const r = await blizzardFetch(path, token, { region });
+          return r.ok ? await r.json() : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+    const faction = profile?.faction?.type?.toLowerCase() || null;
+    const characterName = typeof profile?.name === "string" ? profile.name : null;
+    // Only pass on an image hosted by Blizzard's own render server.
+    const avatarUrl = media?.assets?.find((a) => a.key === "avatar")?.value;
+    const avatar =
+      typeof avatarUrl === "string" && avatarUrl.startsWith("https://render.worldofwarcraft.com/") ? avatarUrl : null;
 
-    return NextResponse.json({ ownedIds, usableIds, faction, name: characterName });
+    return NextResponse.json({ ownedIds, usableIds, faction, name: characterName, avatar });
   } catch {
     return NextResponse.json({ error: "Lookup failed, try again" }, { status: 500 });
   }

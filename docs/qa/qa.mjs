@@ -414,9 +414,12 @@ await t("realm", "saved searches restore: legacy typed realm ('Area 52') and new
     await ev(`localStorage.clear(); localStorage.setItem('wow-mount-tracker:last-search', JSON.stringify({region:'us',realm:${JSON.stringify(savedRealm)},name:${JSON.stringify(savedName)}})); localStorage.setItem('wow-mount-tracker:owned:us:${cacheRealmKey}:legacycheck', ${JSON.stringify(cache)})`);
     await load();
     await wait(`document.querySelector('.mount-icon-link.owned')`, 6000, "cached restore");
-    eq(await ev(`document.querySelector('.realm-combobox input').value`), "Area 52", `realm shown by proper name (saved as '${savedRealm}')`);
-    eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), "Legacycheck", `name capitalised (saved as '${savedName}')`);
+    // Name capitalised, realm by its proper name, written the in-game way (no space).
+    eq(await text(".character-name"), "Legacycheck-Area52", `plate (saved as '${savedRealm}' / '${savedName}')`);
+    eq(await text(".character-portrait.placeholder"), "L", "a scan cached before portraits shows the initial");
     eq(await status(), null, "no status message for a silent restore");
+    await mclick(byText(".search-bar button", "Scan another character"));
+    eq(await ev(`document.querySelector('.realm-combobox input').value`), "Area 52", "form keeps the realm's proper name");
   }
   await ev(`localStorage.clear()`); await load();
 });
@@ -448,10 +451,10 @@ await t("scan", "scan via Enter key (lower-case input): status, name capitalised
   await typeInto('.search-bar input[placeholder="Realm"]', CHAR.realm.toLowerCase());
   await typeInto('.search-bar input[placeholder="Character name"]', CHAR.name.toLowerCase());
   await press("Enter");
-  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "scan complete");
-  ok((await status()).includes(`Loaded ${api.ownedIds.length} owned mounts for ${CHAR.name} (${CHAR.realm})`), "status: " + (await status()));
-  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), CHAR.name, "name shown as the game spells it");
-  eq(await ev(`document.querySelector('.search-bar input[placeholder="Realm"]').value`), CHAR.realm, "realm shown by its proper name");
+  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "scan complete");
+  eq(await text(".search-announcement"), `Loaded ${api.ownedIds.length} owned mounts for ${CHAR.name} (${CHAR.realm}).`, "screen-reader announcement");
+  eq(await status(), null, "no visible status message after a successful scan");
+  eq(await text(".character-name"), `${CHAR.name}-${CHAR.realm}`, "name as the game spells it, realm by its proper name");
   const s = await text(".collection-summary");
   ok(s.includes(`${expected.collected} / ${expected.total} mounts collected`), `collected/total: ${s}`);
   ok(s.includes(`${expected.usable} usable on this character`), `usable: ${s}`);
@@ -474,10 +477,45 @@ await t("scan", "cache written and restored after reload", async () => {
   await load();
   await wait(`document.querySelector('.mount-icon-link.owned')`, 8000, "cached restore");
   eq(await count(".mount-icon-link.owned"), expected.renderedOwned, "owned after reload");
-  eq(await ev(`document.querySelector('.search-bar input[placeholder="Realm"]').value`), CHAR.realm);
-  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), CHAR.name);
+  eq(await text(".character-name"), `${CHAR.name}-${CHAR.realm}`, "character shown after reload");
   eq(await status(), null, "restored silently (no cached-collection message)");
   eq(await text(".search-bar button[type=submit]"), "Rescan");
+});
+await t("plate", "scanned: fields collapse to Rescan + Scan another; Name-Realm + Blizzard portrait on the right", async () => {
+  eq(await count(".search-bar input, .search-bar select"), 0, "no form fields while a character is loaded");
+  eq(await ev(`${$$(".search-bar button")}.map(b=>b.textContent).join('|')`), "Rescan|Scan another character");
+  eq(JSON.parse(await LS(scanKey)).avatar, api.avatar, "portrait URL cached with the scan");
+  ok(/^https:\/\/render\.worldofwarcraft\.com\//.test(api.avatar ?? ""), "API returned a Blizzard render URL: " + api.avatar);
+  await wait(`document.querySelector('img.character-portrait')?.complete && document.querySelector('img.character-portrait').naturalWidth > 0`, 10000, "portrait loaded");
+  eq(await ev(`document.querySelector('img.character-portrait').getAttribute('src')`), api.avatar);
+  eq(await ev(`document.querySelector('img.character-portrait').getAttribute('alt')`), "", "decorative (name is right beside it)");
+  const r = await ev(`(()=>{const b=document.querySelector('.search-bar').getBoundingClientRect(), p=document.querySelector('.character-plate').getBoundingClientRect(), a=document.querySelector('.search-actions').getBoundingClientRect(); return {plateRightGap: b.right-p.right, actionsLeftGap: a.left-b.left, plateLeft:p.left, actionsRight:a.right}})()`);
+  ok(r.plateRightGap < 30 && r.actionsLeftGap < 30 && r.plateLeft > r.actionsRight, "buttons left, plate right-aligned: " + JSON.stringify(r));
+});
+await t("plate", "'Scan another character' opens the form (realm kept, name focused) without clearing results; Cancel goes back", async () => {
+  const owned0 = await count(".mount-icon-link.owned");
+  await mclick(byText(".search-bar button", "Scan another character"));
+  eq(await ev(`document.querySelector('.realm-combobox input').value`), CHAR.realm, "realm kept");
+  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), "", "name empty");
+  eq(await ev(`document.activeElement.getAttribute('aria-label')`), "Character name", "name field focused");
+  eq(await ev(`${$$(".search-bar button")}.map(b=>b.textContent).join('|')`), "Scan|Cancel");
+  eq(await count(".mount-icon-link.owned"), owned0, "results still on screen");
+  await mclick(byText(".search-bar button", "Cancel"));
+  eq(await text(".character-name"), `${CHAR.name}-${CHAR.realm}`, "back to the character");
+  eq(await ev(`document.activeElement.textContent`), "Scan another character", "focus returns to the button");
+});
+await t("plate", "Rescan of a character that no longer exists (404) reopens the form filled in, with the error", async () => {
+  await withApi("capture", async () => {
+    await mclick(`document.querySelector('.search-bar button[type=submit]')`);
+    await wait(`/not found/i.test(document.querySelector('.search-status')?.textContent||'')`, 8000, "404 message");
+  });
+  eq(await ev(`document.querySelector('.search-bar input[placeholder="Character name"]').value`), CHAR.name, "name filled in");
+  eq(await ev(`document.querySelector('.realm-combobox input').value`), CHAR.realm, "realm filled in");
+  eq(await count(".character-plate"), 0, "plate gone with the results");
+  await mclick(`document.querySelector('.search-bar input[placeholder="Character name"]')`);
+  await press("Enter");
+  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "scan again");
+  eq(await text(".character-name"), `${CHAR.name}-${CHAR.realm}`);
 });
 
 // ---------------------------------------------------------------- D. section progress
@@ -813,9 +851,10 @@ for (const [mode, expectText] of [["429", /rate limit/i], ["500", /lookup failed
 }
 await t("failures", "after a failure, a normal rescan succeeds again", async () => {
   await mclick(`document.querySelector('.search-bar button[type=submit]')`);
-  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "successful rescan");
+  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "successful rescan");
 });
 await t("failures", "404 from a scanned state clears the previous character's results", async () => {
+  await mclick(byText(".search-bar button", "Scan another character"));
   await typeInto('.search-bar input[placeholder="Character name"]', "Zzzqqqnotreal");
   await press("Enter");
   await wait(`/not found/i.test(document.querySelector('.search-status')?.textContent||'')`, 10000, "404 message");
@@ -823,16 +862,17 @@ await t("failures", "404 from a scanned state clears the previous character's re
   eq(await count(".mount-icon-link.owned"), 0, "no owned icons left");
   eq(await ev(`${$$(".segment-input")}.filter(i=>i.disabled).length`), 2, "Collected/Uncollected disabled again");
   await typeInto('.search-bar input[placeholder="Character name"]', CHAR.name);
-  await press("Enter"); await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "rescan");
+  await press("Enter"); await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "rescan");
 });
 await t("failures", "rapid double-click on Scan sends exactly one request", async () => {
   apiRequests = 0;
   const p = await pos(`document.querySelector('.search-bar button[type=submit]')`);
   for (let i = 0; i < 2; i++) for (const [type, extra] of [["mousePressed", { button: "left", clickCount: 1 }], ["mouseReleased", { button: "left", clickCount: 1 }]]) await send("Input.dispatchMouseEvent", { type, x: p.x, y: p.y, ...extra });
-  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "scan");
+  await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "scan");
   eq(apiRequests, 1, "API requests after a double click");
 });
 await t("failures", "HTML in the name/realm fields is rendered as text, never as markup", async () => {
+  await mclick(byText(".search-bar button", "Scan another character"));
   await typeInto('.search-bar input[placeholder="Character name"]', "<img src=x onerror=window.__xss=1><b>x</b>");
   await press("Enter"); await sleep(1200);
   eq(await count(".search-status b, .search-status img"), 0, "no injected elements");
@@ -851,7 +891,7 @@ await t("storage", "with localStorage blocked: loads, scans, themes, collapses -
     await typeInto('.search-bar input[placeholder="Realm"]', CHAR.realm);
     await typeInto('.search-bar input[placeholder="Character name"]', CHAR.name);
     await press("Enter");
-    await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-status')?.textContent||'')`, 15000, "scan without storage");
+    await wait(`/^Loaded \\d+ owned mounts/.test(document.querySelector('.search-announcement')?.textContent||'')`, 15000, "scan without storage");
     eq(await count(".mount-icon-link.owned"), expected.renderedOwned);
     await mclick(`document.querySelector('.theme-chip[aria-label="Horde"]')`);
     eq((await attrs()).palette, "horde", "theme switch works in-session");
@@ -889,7 +929,8 @@ await t("keyboard", "Tab reaches every control in a sensible order, each with a 
   ok(noRing.length === 0, "no visible focus indicator on: " + noRing.join(", "));
   const idx = (l) => order.findIndex((x) => x.startsWith(l));
   ok(idx("Collection") >= 0 && idx("Quest Log") > idx("Collection"), "tabs reachable in order");
-  ok(order.some((x) => /^Realm|^Tichondrius|^US/.test(x)) || real.some((s) => s.tag === "input" || s.tag === "select"), "search inputs reachable");
+  // A character is loaded (cached scan), so the search area is Rescan + Scan another character.
+  ok(idx("Rescan") > idx("Quest Log") && idx("Scan another character") > idx("Rescan"), "Rescan / Scan another character reachable in order");
   ok(real.some((s) => s.cls === "segment-input"), "filter radios reachable");
   ok(real.some((s) => s.cls === "toggle-input"), "Show retired toggle reachable");
   ok(real.some((s) => s.cls === "filter-button"), "Expand/Collapse buttons reachable");

@@ -264,11 +264,27 @@ slugs differ: Azjol-Nerub is `azjolnerub`). `SearchBar` validates the realm
 against the list before any request and sends the slug; `app/api/collections`
 does the same check server-side (400 "Unknown realm"). Cache/"done" keys use
 the slug; old saved searches (realm as typed) still restore. Editing the form
-clears an error message. A cached scan is restored silently on page load (no
-status line); after a scan the form shows the realm's proper name and the
-character name as the game spells it (`name` from the profile call in
-`/api/collections`, with a capital-first fallback for older saved searches),
-so "kurowastaken" becomes "Kurowastaken".
+clears an error message.
+
+**Search area modes** (`components/SearchBar.js`): with no character loaded it
+is the form. Once a character is loaded (scan or silent restore from cache) it
+collapses to **Rescan** + **Scan another character** on the left and a
+character plate on the right: portrait + "Name-Realm" (realm without spaces, as
+in game). "Scan another character" reopens the form (region/realm kept, name
+empty and focused, **Cancel** goes back) without clearing the results; rescan
+always scans the loaded character, not the form. A 404 clears the results and
+leaves the form open and filled in. There is no visible success message - only
+errors show; a visually hidden `role="status"` line (`.search-announcement`)
+announces "Loaded N owned mounts for ..." to screen readers (tests wait on it).
+The name comes from the profile call in `/api/collections` as the game spells
+it ("kurowastaken" -> "Kurowastaken"; capital-first fallback for older saved
+searches). The portrait is the `avatar` asset of Blizzard's `character-media`
+endpoint (84x84 JPG on `render.worldofwarcraft.com`, public, hotlinked; only
+URLs on that host are passed on), fetched in parallel with the profile,
+best-effort, and cached with the scan; its URL changes when Blizzard
+re-renders the character, so it's refreshed on every scan. Scans cached before
+portraits show the name's initial until the next rescan. The same endpoint
+also has `main-raw`, a 1600x1200 transparent full-body render (unused).
 
 `html` has `scrollbar-gutter: stable` (`globals.css`): without it, Collapse all
 (or anything else that makes the page shorter than the window) removed the
@@ -280,7 +296,7 @@ text rather than blocking searches.
 
 `docs/qa-report.md` is the QA record (what was tested, run history, bugs found
 and fixed, what is still untested) and `docs/qa/` holds the runnable suites:
-`qa.mjs` (Node + Chrome, 92 checks), `ff.mjs` (Firefox over WebDriver BiDi, 51
+`qa.mjs` (Node + Chrome, 95 checks), `ff.mjs` (Firefox over WebDriver BiDi, 52
 checks - Firefox is the user's browser), `realms-unit.mjs` and `leak.mjs`. Re-run them after
 UI/API changes and keep the report current. `app/api/collections/route.js`
 validates realm/character slugs (`SLUG_PATTERN`: letters of any script, digits,

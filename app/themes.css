@@ -677,6 +677,26 @@ html .filter-bar .toggle.disabled {
 }
 
 /* ------------------------------------------------------------------ */
+/* CHARACTER PLATE (search bar once a character is scanned; all themes) */
+/* ------------------------------------------------------------------ */
+.character-name {
+  color: var(--heading, var(--foreground));
+}
+html:is([data-type="serif"], [data-type="engraved"]) .character-name {
+  font-family: Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  letter-spacing: 0.02em;
+}
+/* Portrait in a gilded ring, like an in-game unit frame. */
+html .character-portrait {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--background), 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+html .character-portrait.placeholder {
+  background: var(--panel-2);
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
 /* QUEST LOG (all themes; layout in globals.css)                        */
 /* Both panes take their colours from the palette, so every theme      */
 /* restyles them; headings follow the theme's heading font.            */
