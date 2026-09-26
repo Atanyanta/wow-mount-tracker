@@ -715,6 +715,41 @@ await t("questlog", "clicking a quest selects it; categories collapse/expand (to
   eq(await count(".quest-entry"), total, "Expand all");
   eq(await LS("wow-mount-tracker:collapsed"), collectionCollapse0, "Collection collapse state untouched");
 });
+await t("questlog", "difficulty tiers by expansion age; Difficulty chips + Expansion filter; saved across reload; Clear filters", async () => {
+  const { resolveFarmables, difficultyTier } = await lib("farmables.js");
+  // The rule, written out independently: current + previous expansion = not soloable, 2 back = hard, older = easy.
+  const expectTier = (x) => (x === "Midnight" || x === "The War Within" ? "group" : x === "Dragonflight" ? "hard" : "easy");
+  for (const x of new Set(farmables.groups.flatMap((g) => g.activities.map((a) => a.expansion)))) eq(difficultyTier(x), expectTier(x), `tier of ${x}`);
+  const quests = resolveFarmables({ groups: farmables.groups, mounts, ownedIds: owned, faction: api.faction }).flatMap((g) => g.activities).filter((a) => a.remaining > 0);
+  const total = quests.length;
+  eq(await count(".quest-entry"), total, "all quests with no filter");
+  const pillOf = { easy: "Easy", hard: "Hard", group: "Not soloable" };
+  const firstQuest = await detailTitle();
+  eq(await text(".quest-tier"), pillOf[expectTier(quests.find((q) => q.name === firstQuest).expansion)], `tier pill on ${firstQuest}`);
+  const setExpansion = (v) => ev(`(()=>{const s=document.querySelector('#quest-expansion-filter'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,${JSON.stringify(v)}); s.dispatchEvent(new Event('change',{bubbles:true}))})()`);
+  // Easy + Hard = "what I can actually do"
+  await mclick(byText(".chip-button", "Easy")); await mclick(byText(".chip-button", "Hard"));
+  const soloable = quests.filter((q) => expectTier(q.expansion) !== "group").length;
+  eq(await count(".quest-entry"), soloable, "Easy + Hard hides not-soloable quests");
+  eq(await ev(`${$$(".chip-button")}.map(b=>b.getAttribute('aria-pressed')).join(',')`), "true,true,false");
+  eq(await text(".quest-filter-count"), `Showing ${soloable} of ${total} quests Clear filters`);
+  eq(await text(".quest-tier") === "Not soloable", false, "selected quest is soloable");
+  await reloadToQuests();
+  eq(await count(".quest-entry"), soloable, "filters remembered after reload");
+  eq(JSON.parse(await LS("wow-mount-tracker:quest-log-filters")).tiers.join(","), "easy,hard");
+  // Expansion on top of difficulty: Midnight is never Easy/Hard
+  await setExpansion("Midnight");
+  eq(await text(".quest-log-empty"), "No quests match these filters.");
+  await mclick(byText(".link-button", "Clear filters"));
+  eq(await count(".quest-entry"), total, "Clear filters shows everything again");
+  eq(await ev(`document.querySelector('#quest-expansion-filter').value`), "all");
+  // Expansion alone
+  await setExpansion("Midnight");
+  eq(await count(".quest-entry"), quests.filter((q) => q.expansion === "Midnight").length, "Midnight only");
+  eq(await text(".quest-tier"), "Not soloable", "Midnight quest is not soloable");
+  await setExpansion("all");
+  eq(await LS("wow-mount-tracker:quest-log-filters"), JSON.stringify({ tiers: [], expansion: "all" }));
+});
 await t("questlog", "owned mounts hidden by default; 'Include collected' adds collected quests and rewards", async () => {
   eq(await count(".quest-reward .mount-icon-link.owned"), 0, "no owned reward on the selected quest");
   eq(await count(".quest-entry.collected"), 0, "no fully-collected quests by default");

@@ -8,9 +8,9 @@ Scripts, raw results and screenshots referenced below are in [`docs/qa/`](qa/).
 | Area | Status | Checks |
 |---|---|---|
 | Data integrity, API, **realm list**, pure logic (Node) | Pass | 22 / 22 (+ 28 realm-library unit checks inside them) |
-| Full UI in **Chrome** - dev server | Pass | 73 / 73 (95 / 95 with the Node checks) |
+| Full UI in **Chrome** - dev server | Pass | 74 / 74 (96 / 96 with the Node checks) |
 | Full UI in **Chrome** - production build | Pass | 91 / 91 |
-| Full UI in **Firefox 156** - dev server | Pass | 52 / 52 |
+| Full UI in **Firefox 156** - dev server | Pass | 54 / 54 |
 | Full UI in **Firefox 156** - production build | Pass | 47 / 47 |
 | Memory / leak test (client, server) | No leak found | 4 measured cycles + server stress (run before the realm feature; the combobox holds no timers or global listeners) |
 | Security (secret exposure, input validation, `npm audit`) | Pass after 1 fix | 0 vulnerabilities |
@@ -112,6 +112,7 @@ The realm field used to be free text, so a typo or a differently punctuated real
 | 19 | 2026-09-25, Dailies tab rebuilt as the **Quest Log** (dev) | **92 / 92** and **50 / 50** | Dailies tests rewritten for the list + detail layout (selection, category collapse and persistence, Completed category, Hide completed moving the selection); responsive check now also asserts the stacked layout. First run 91 / 92: one assertion of mine assumed the Collection collapse key was empty, but earlier tests legitimately leave `[]` there - now compared with its value before the Quest Log clicks. Leak test (3 cycles, now also selecting/collapsing quests): nodes and listeners constant, heap flat - no leak. |
 | 20 | 2026-09-25, Quest Log follows the theme; curation notes removed; silent cache restore + capitalised name; scrollbar-gutter fix (dev) | **92 / 92** and **51 / 51** | Tests updated for the silent restore (the "Showing cached collection" message is gone) and a lower-case scan that must come back as "Kurowastaken". A sideways-shift check first added to the Chrome suite passed even with the fix removed (headless Chrome never showed the shift), so it was dropped there and added to the Firefox suite, which reproduces the bug (5.10). Screenshots checked in Dark, Light, Alliance (done state) and Void. |
 | 21 | 2026-09-25, search area collapses once a character is loaded (Rescan / Scan another character + portrait and Name-Realm); no visible success message (dev) | **95 / 95** and **52 / 52** | New "plate" tests (layout, Blizzard portrait loads, Scan another + Cancel with focus handling, 404 on rescan reopens the filled form). First run 61 / 95: my plate assertions read the whole plate, which also holds the portrait's placeholder initial; one early failure left the page in the wrong state and cascaded. After reading `.character-name`: all pass. One Firefox run hung silently for 10+ minutes (cause not identified; the rerun passed) - `ff.mjs` now gives every browser command a 60 s limit so a hang fails loudly. Leak test: no leak. |
+| 22 | 2026-09-26, Quest Log difficulty tiers (Easy / Hard / Not soloable by expansion age) + Difficulty and Expansion filters (dev) | **96 / 96** and **54 / 54** | New checks: the tier of every expansion in the data against the rule written out independently; Easy + Hard shows exactly the expected number of quests (computed from the data and the live scan); filters survive reload (Chrome and Firefox, no hydration error); Midnight + Easy shows the "no match" message; Clear filters; Midnight alone. |
 
 ## 5. Bugs found and fixed
 
@@ -199,8 +200,8 @@ Scripts live in `docs/qa/` and use absolute paths for this machine (`ROOT` at th
 
 ```
 npm run dev                                # server on :3000
-node docs/qa/qa.mjs                        # Node + Chrome suite (95 checks; runs realms-unit.mjs too)
-node docs/qa/ff.mjs                        # Firefox suite (52 checks)
+node docs/qa/qa.mjs                        # Node + Chrome suite (96 checks; runs realms-unit.mjs too)
+node docs/qa/ff.mjs                        # Firefox suite (54 checks)
 node docs/qa/realms-unit.mjs               # realm lookup/search library on its own (28 checks)
 node docs/qa/leak.mjs 4                    # client memory-leak test, 4 measured cycles
 npm run build:realms                       # refresh data/realms.json from Blizzard (needs .env.local)

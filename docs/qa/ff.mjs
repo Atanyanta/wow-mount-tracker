@@ -185,6 +185,17 @@ await sleep(200);
 await ev(`document.querySelector('.quest-button.undo').click()`); // clean up
 await sleep(200);
 check("Undo returns the quest", (await ev("document.querySelectorAll('.quest-category.completed').length")) === 0);
+{
+  const all = await ev("document.querySelectorAll('.quest-entry').length");
+  await clickText(".chip-button", "Easy"); await clickText(".chip-button", "Hard"); await sleep(200);
+  const filtered = await ev("document.querySelectorAll('.quest-entry').length");
+  await reload();
+  await clickText(".view-tab", "Quest Log"); await sleep(300);
+  const afterReload = await ev("document.querySelectorAll('.quest-entry').length");
+  check("Difficulty filter (Easy + Hard) narrows the list and survives a reload, no hydration error", filtered > 0 && filtered < all && afterReload === filtered && hydrationErrors() === 0, `${all} -> ${filtered} -> ${afterReload}`);
+  await clickText(".link-button", "Clear filters"); await sleep(200);
+  check("Clear filters restores every quest", (await ev("document.querySelectorAll('.quest-entry').length")) === all);
+}
 
 console.log("\n[6] Realm type-ahead in Firefox");
 const { readFileSync: readFs } = await import("node:fs");

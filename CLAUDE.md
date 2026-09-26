@@ -199,6 +199,17 @@ no lockout) and weekly-quest chance rewards are all in the `excluded` list of
   **Undo**) and returns by itself when its period expires; "Hide completed"
   hides that category (and Done then moves the selection to the next quest).
   Selection is by activity id and falls back to the first quest in the list.
+  **Filters** (filter bar, saved in localStorage `wow-mount-tracker:quest-log-filters`
+  as `{ tiers, expansion }`): Difficulty chips (multi-select; none = all) and an
+  Expansion dropdown (expansions that have quests, newest first). Difficulty
+  is a rule of thumb set by the user, by expansion age, in `difficultyTier()`
+  (`lib/farmables.js`): current + previous expansion = "Not soloable", 2 back
+  = "Hard", 3+ back = "Easy". It counts from `EXPANSION_NAMES[0]`
+  (`lib/groupMounts.js`), so adding the next expansion to `EXPANSIONS` shifts
+  every tier automatically. Each quest page shows its tier as a pill; the
+  filter bar shows "Showing N of M quests" + Clear filters while filtering.
+  `lib/farmables.js` imports `./groupMounts.js` with the extension because
+  `docs/qa/qa.mjs` loads it in plain Node.
   Below 760px the panes stack and picking a quest scrolls to its details.
   Layout CSS is in `globals.css`, colours/fonts in the QUEST LOG block of
   `themes.css`; both panes and the Done button take the theme's palette and
@@ -296,7 +307,7 @@ text rather than blocking searches.
 
 `docs/qa-report.md` is the QA record (what was tested, run history, bugs found
 and fixed, what is still untested) and `docs/qa/` holds the runnable suites:
-`qa.mjs` (Node + Chrome, 95 checks), `ff.mjs` (Firefox over WebDriver BiDi, 52
+`qa.mjs` (Node + Chrome, 96 checks), `ff.mjs` (Firefox over WebDriver BiDi, 54
 checks - Firefox is the user's browser), `realms-unit.mjs` and `leak.mjs`. Re-run them after
 UI/API changes and keep the report current. `app/api/collections/route.js`
 validates realm/character slugs (`SLUG_PATTERN`: letters of any script, digits,

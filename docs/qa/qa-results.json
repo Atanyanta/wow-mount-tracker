@@ -352,6 +352,11 @@
     },
     {
       "group": "questlog",
+      "name": "difficulty tiers by expansion age; Difficulty chips + Expansion filter; saved across reload; Clear filters",
+      "ok": true
+    },
+    {
+      "group": "questlog",
       "name": "owned mounts hidden by default; 'Include collected' adds collected quests and rewards",
       "ok": true
     },

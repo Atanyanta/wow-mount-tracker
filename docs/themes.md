@@ -89,6 +89,9 @@ and glossy accent fill as the XP bars):
   "Include collected mounts").
 - Expand all / Collapse all buttons, with chevrons that match the section
   headings (down = expanded, right = collapsed).
+- Quest Log only: `.chip-button` multi-select chips (Difficulty) in the same
+  segmented track, and `.filter-select` (Expansion). The difficulty pills on
+  quest pages are green / orange / red (darker on Light).
 
 ## Deciding what goes in each theme
 

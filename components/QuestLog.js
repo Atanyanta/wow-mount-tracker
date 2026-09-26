@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import mounts from "@/data/mounts.json";
 import farmables from "@/data/farmables.json";
-import { resolveFarmables } from "@/lib/farmables";
+import { DIFFICULTY_TIERS, difficultyTier, resolveFarmables } from "@/lib/farmables";
+import { EXPANSION_NAMES } from "@/lib/groupMounts";
 import { flipTooltip } from "@/lib/tooltipFlip";
 import { questLogCollapse } from "@/lib/collapseStore";
 import { RESET_SCHEDULES, formatCountdown, getNextReset, getPeriodId } from "@/lib/resets";
@@ -24,6 +25,32 @@ const COMPLETED_CATEGORY = "completed";
 // Below this width the two panes stack (see .quest-log-frame in globals.css),
 // so picking a quest scrolls its details into view.
 const STACKED_QUERY = "(max-width: 760px)";
+
+// Difficulty / expansion filters, remembered in this browser.
+const FILTERS_KEY = "wow-mount-tracker:quest-log-filters";
+const TIER_IDS = DIFFICULTY_TIERS.map((t) => t.id);
+// Expansions that have at least one quest, newest first (the filter's options).
+const QUEST_EXPANSIONS = EXPANSION_NAMES.filter((name) =>
+  farmables.groups.some((g) => g.activities.some((a) => a.expansion === name))
+);
+
+function readFilters() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(FILTERS_KEY)) || {};
+    return {
+      tiers: Array.isArray(raw.tiers) ? raw.tiers.filter((t) => TIER_IDS.includes(t)) : [],
+      expansion: QUEST_EXPANSIONS.includes(raw.expansion) ? raw.expansion : "all",
+    };
+  } catch {
+    return { tiers: [], expansion: "all" };
+  }
+}
+
+// No difficulty picked means every difficulty.
+function matchesFilters(activity, { tiers, expansion }) {
+  if (expansion !== "all" && activity.expansion !== expansion) return false;
+  return tiers.length === 0 || tiers.includes(difficultyTier(activity.expansion));
+}
 
 function characterKey(character) {
   if (!character?.name || !character?.realm) return null;
@@ -65,7 +92,31 @@ export default function QuestLog({ ownedIds, faction, character }) {
   const [hideDone, setHideDone] = useState(false);
   const [includeCollected, setIncludeCollected] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [filters, setFilters] = useState({ tiers: [], expansion: "all" });
   const detailRef = useRef(null);
+
+  useEffect(() => {
+    // Restore the saved filters (localStorage - an external system).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilters(readFilters());
+  }, []);
+
+  function updateFilters(next) {
+    setFilters(next);
+    try {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable - the filter still applies for this session.
+    }
+  }
+
+  function toggleTier(id) {
+    const tiers = filters.tiers.includes(id) ? filters.tiers.filter((t) => t !== id) : [...filters.tiers, id];
+    // Keep the tiers in their display order.
+    updateFilters({ ...filters, tiers: TIER_IDS.filter((t) => tiers.includes(t)) });
+  }
+
+  const filtersActive = filters.tiers.length > 0 || filters.expansion !== "all";
 
   const collapsedKeys = useSyncExternalStore(
     questLogCollapse.subscribe,
@@ -105,10 +156,15 @@ export default function QuestLog({ ownedIds, faction, character }) {
   // period ends.
   const categories = [];
   const completed = [];
+  let questCount = 0; // quests before the difficulty/expansion filters
+  let matchingCount = 0;
   for (const group of groups) {
     const entries = [];
     for (const activity of group.activities) {
       if (!includeCollected && activity.remaining === 0) continue;
+      questCount += 1;
+      if (!matchesFilters(activity, filters)) continue;
+      matchingCount += 1;
       const entry = { activity, cadence: group.cadence };
       if (isDone(done, activity, group.cadence, region, now)) completed.push({ ...entry, done: true });
       else entries.push({ ...entry, done: false });
@@ -188,6 +244,44 @@ export default function QuestLog({ ownedIds, faction, character }) {
         </span>
       </p>
       <div className="filter-bar">
+        <div className="filter-group">
+          <span className="filter-label" id="quest-difficulty-label">
+            Difficulty
+          </span>
+          <div className="segmented" role="group" aria-labelledby="quest-difficulty-label">
+            {DIFFICULTY_TIERS.map((tier) => (
+              <button
+                key={tier.id}
+                type="button"
+                className={`chip-button ${tier.id}`}
+                aria-pressed={filters.tiers.includes(tier.id)}
+                onClick={() => toggleTier(tier.id)}
+              >
+                {tier.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label" htmlFor="quest-expansion-filter">
+            Expansion
+          </label>
+          <select
+            id="quest-expansion-filter"
+            className="filter-select"
+            value={filters.expansion}
+            onChange={(e) => updateFilters({ ...filters, expansion: e.target.value })}
+            autoComplete="off"
+            suppressHydrationWarning
+          >
+            <option value="all">All expansions</option>
+            {QUEST_EXPANSIONS.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
         <Toggle checked={hideDone} onChange={setHideDone}>
           Hide completed
         </Toggle>
@@ -210,12 +304,22 @@ export default function QuestLog({ ownedIds, faction, character }) {
             Collapse all
           </button>
         </div>
+        {filtersActive ? (
+          <span className="filter-bar-hint quest-filter-count">
+            Showing {matchingCount} of {questCount} quests{" "}
+            <button type="button" className="link-button" onClick={() => updateFilters({ tiers: [], expansion: "all" })}>
+              Clear filters
+            </button>
+          </span>
+        ) : null}
         {!key ? (
           <span className="filter-bar-hint">Scan a character to track completion (saved per character).</span>
         ) : null}
       </div>
 
-      {flat.length === 0 ? (
+      {flat.length === 0 && questCount > 0 && matchingCount === 0 ? (
+        <p className="quest-log-empty">No quests match these filters.</p>
+      ) : flat.length === 0 ? (
         <p className="quest-log-empty">
           {completed.length > 0
             ? "All done for this reset."
@@ -296,6 +400,7 @@ export default function QuestLog({ ownedIds, faction, character }) {
 
 function QuestDetail({ ref, entry, ownedIds, includeCollected, schedule, resetIn, canTrack, onDone }) {
   const { activity, cadence, done } = entry;
+  const tier = DIFFICULTY_TIERS.find((t) => t.id === difficultyTier(activity.expansion));
   const rows = includeCollected ? activity.rows : activity.rows.filter((r) => !r.owned);
   // One objective per boss (a boss can drop several of the listed mounts).
   const objectives = [...new Map(rows.map(({ fm }) => [`${fm.boss}|${fm.difficulty ?? ""}`, fm])).values()];
@@ -310,6 +415,11 @@ function QuestDetail({ ref, entry, ownedIds, includeCollected, schedule, resetIn
         </h2>
         <p className="quest-tags">
           <span className={`quest-cadence ${cadence}`}>{cadence}</span>
+          {tier ? (
+            <span className={`quest-tier ${tier.id}`} title="Rule of thumb for soloing at max level, by how many expansions ago it is">
+              {tier.label}
+            </span>
+          ) : null}
           {activity.confidence === "low" ? (
             <span className="quest-unverified" title="This drop hasn't been confirmed in game yet">
               unverified

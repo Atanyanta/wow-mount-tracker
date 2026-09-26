@@ -195,6 +195,16 @@
     "detail": ""
   },
   {
+    "name": "Difficulty filter (Easy + Hard) narrows the list and survives a reload, no hydration error",
+    "ok": true,
+    "detail": "18 -> 12 -> 12"
+  },
+  {
+    "name": "Clear filters restores every quest",
+    "ok": true,
+    "detail": ""
+  },
+  {
     "name": "scanned character restored after a Firefox reload (Name-Realm + portrait), no hydration error",
     "ok": true,
     "detail": "\"Kurowastaken-Tichondrius\""

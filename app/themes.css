@@ -616,6 +616,72 @@ html .filter-bar .segment:has(.segment-input:disabled) {
   cursor: default;
 }
 
+/* Multi-select chips inside a segmented track (Quest Log difficulty): same
+   look as the radio segments above, but each one toggles on its own. */
+.chip-button {
+  padding: 0.32rem 0.85rem;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: background 0.12s, opacity 0.12s;
+}
+.chip-button:hover {
+  opacity: 1;
+}
+.chip-button[aria-pressed="true"] {
+  opacity: 1;
+  color: var(--on-owned);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2)),
+    var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.chip-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Dropdown in the filter bar (Quest Log expansion). */
+.filter-select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-select:hover {
+  border-color: var(--accent);
+}
+.filter-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Text-style button ("Clear filters"). */
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* Toggle switch. */
 html .filter-bar .toggle {
   position: relative;
@@ -785,6 +851,37 @@ html[data-palette="light"] .quest-cadence.weekly {
 }
 html[data-palette="light"] .quest-unverified {
   color: #a52a2a;
+}
+/* Difficulty tier: filled pills (green / orange / red), so they read apart
+   from the outlined cadence pill beside them. */
+.quest-tier {
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tier);
+  background: color-mix(in srgb, var(--tier) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tier) 45%, transparent);
+}
+.quest-tier.easy {
+  --tier: #58d68d;
+}
+.quest-tier.hard {
+  --tier: #f0a04b;
+}
+.quest-tier.group {
+  --tier: #ec7063;
+}
+html[data-palette="light"] .quest-tier.easy {
+  --tier: #1e7a3c;
+}
+html[data-palette="light"] .quest-tier.hard {
+  --tier: #a35400;
+}
+html[data-palette="light"] .quest-tier.group {
+  --tier: #a52a2a;
 }
 .quest-section-heading {
   padding-bottom: 0.2rem;
